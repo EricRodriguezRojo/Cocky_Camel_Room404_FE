@@ -3,45 +3,37 @@ package com.example.cocky_camel_room404_fe
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.cocky_camel_room404_fe.ui.theme.Cocky_Camel_Room404_FETheme
+import com.example.cocky_camel_room404_fe.ui.theme.Room404Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            Cocky_Camel_Room404_FETheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            Room404Theme {
+                // 0: Login, 1: Register, 2: Menu
+                var currentScreen by remember { mutableStateOf(0) }
+
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    when (currentScreen) {
+                        0 -> LoginScreen(
+                            onLoginSuccess = { currentScreen = 2 },
+                            onNavigateToRegister = { currentScreen = 1 }
+                        )
+                        1 -> RegisterScreen(
+                            onRegisterSuccess = { currentScreen = 0 },
+                            onNavigateToLogin = { currentScreen = 0 }
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Cocky_Camel_Room404_FETheme {
-        Greeting("Android")
     }
 }
