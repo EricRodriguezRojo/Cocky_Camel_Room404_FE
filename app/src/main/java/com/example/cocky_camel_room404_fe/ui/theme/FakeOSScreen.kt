@@ -48,25 +48,25 @@ fun FakeOSScreen(
     val desktopApps = listOf(
         FakeApp("Galería", Icons.Filled.PhotoAlbum, Color(0xFF9C27B0), true),
         FakeApp("Correo", Icons.Filled.Email, Color(0xFFD32F2F), true, true),
-        FakeApp("Notas", Icons.Filled.Edit, Color(0xFFFFC107), true), // <--- CORREGIDO
+        FakeApp("Notas", Icons.Filled.Edit, Color(0xFFFFC107), true),
         FakeApp("Ajustes", Icons.Filled.Settings, Color(0xFF607D8B)),
-        FakeApp("Calculadora", Icons.Filled.Calculate, Color(0xFF455A64), true), // <--- CORREGIDO
-        FakeApp("Calendario", Icons.Filled.DateRange, Color(0xFF03A9F4), true), // <--- CORREGIDO
-        FakeApp("Reloj", Icons.Filled.AccessTime, Color(0xFF00BCD4), true), // <--- CORREGIDO
+        FakeApp("Calculadora", Icons.Filled.Calculate, Color(0xFF455A64), true),
+        FakeApp("Calendario", Icons.Filled.DateRange, Color(0xFF03A9F4), true),
+        FakeApp("Reloj", Icons.Filled.AccessTime, Color(0xFF00BCD4), true),
         FakeApp("Sudoku", Icons.Filled.GridOn, Color(0xFF8BC34A), true),
-        FakeApp("Música", Icons.Filled.MusicNote, Color(0xFFE91E63), true), // <--- CORREGIDO
-        FakeApp("Internet", Icons.Filled.Public, Color(0xFF2196F3)),
+        FakeApp("Música", Icons.Filled.MusicNote, Color(0xFFE91E63), true),
+        FakeApp("Internet", Icons.Filled.Public, Color(0xFF2196F3), true),
         FakeApp("Play Store", Icons.Filled.PlayArrow, Color(0xFF4CAF50)),
-        FakeApp("Tiempo", Icons.Filled.WbSunny, Color(0xFFFFEB3B), true), // <--- CORREGIDO
-        FakeApp("Archivos", Icons.Filled.Folder, Color(0xFFFF9800), true), // <--- CORREGIDO
-        FakeApp("Maps", Icons.Filled.LocationOn, Color(0xFF4CAF50), true), // <--- CORREGIDO
+        FakeApp("Tiempo", Icons.Filled.WbSunny, Color(0xFFFFEB3B), true),
+        FakeApp("Archivos", Icons.Filled.Folder, Color(0xFFFF9800), true),
+        FakeApp("Maps", Icons.Filled.LocationOn, Color(0xFF4CAF50), true),
         FakeApp("System Update", Icons.Filled.Warning, Color(0xFFFF0000), true, true)
     )
 
     val dockApps = listOf(
-        FakeApp("Teléfono", Icons.Filled.Phone, Color(0xFF4CAF50), true), // <--- CORREGIDO
+        FakeApp("Teléfono", Icons.Filled.Phone, Color(0xFF4CAF50), true),
         FakeApp("Mensajes", Icons.AutoMirrored.Filled.Message, Color(0xFF2196F3), true),
-        FakeApp("Cámara", Icons.Filled.CameraAlt, Color(0xFF333333), true) // <--- CORREGIDO
+        FakeApp("Cámara", Icons.Filled.CameraAlt, Color(0xFF333333), true)
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
