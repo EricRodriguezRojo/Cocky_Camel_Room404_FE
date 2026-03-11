@@ -37,7 +37,7 @@ fun GalleryScreen(onBack: () -> Unit) {
         R.drawable.selfie3,R.drawable.dos, R.drawable.foto1,
         R.drawable.foto2,R.drawable.nueve, R.drawable.foto3,
         R.drawable.foto4, R.drawable.foto5, R.drawable.foto6,
-        R.drawable.siete, R.drawable.foto1, R.drawable.selfie1,
+        R.drawable.albora1, R.drawable.albora2, R.drawable.albora3,
     )
 
 
