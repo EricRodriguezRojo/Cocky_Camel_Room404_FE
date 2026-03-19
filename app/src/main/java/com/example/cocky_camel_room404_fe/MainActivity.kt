@@ -10,12 +10,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.cocky_camel_room404_fe.ui.theme.Room404Theme
-// IMPORTANTE: Este es el import para la pantalla de carga
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,58 +33,96 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Room404Theme {
-                var currentScreen by remember { mutableStateOf(0) }
+                val navController = rememberNavController()
                 var appToUnlock by remember { mutableStateOf("") }
                 var requiredPin by remember { mutableStateOf("") }
                 val context = LocalContext.current
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    when (currentScreen) {
-                        0 -> LoginScreen(onLoginSuccess = { currentScreen = 2 }, onNavigateToRegister = { currentScreen = 1 })
-                        1 -> RegisterScreen(onRegisterSuccess = { currentScreen = 0 }, onNavigateToLogin = { currentScreen = 0 })
-                        2 -> MainMenuScreen(onNewGame = { currentScreen = 3 }, onContinue = { currentScreen = 3 }, onSettings = { }, onRanking = { })
-                        3 -> FakeOSScreen(onAppOpened = { appName ->
-                            when (appName) {
-                                "Sudoku" -> currentScreen = 4
-                                "Galería" -> currentScreen = 5
-                                "Mensajes" -> currentScreen = 8
-                                "Notas" -> currentScreen = 10
-                                "Calculadora" -> currentScreen = 11
-                                "Calendario" -> currentScreen = 12
-                                "Reloj" -> currentScreen = 13
-                                "Música" -> currentScreen = 14
-                                "Tiempo" -> currentScreen = 15
-                                "Archivos" -> currentScreen = 16
-                                "Maps" -> currentScreen = 17
-                                "Teléfono" -> currentScreen = 18
-                                "Cámara" -> currentScreen = 19
-                                "Internet" -> currentScreen = 20
-                                "Play Store" -> currentScreen = 21
-                                "Correo" -> { appToUnlock = "Correo"; requiredPin = "7429"; currentScreen = 6 }
-                                "System Update" -> { appToUnlock = "System Update"; requiredPin = "0404"; currentScreen = 6 }
-                                else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
-                            }
-                        })
-                        4 -> SudokuScreen(onBack = { currentScreen = 3 })
-                        5 -> GalleryScreen(onBack = { currentScreen = 3 })
-                        6 -> LockScreen(appName = appToUnlock, correctPin = requiredPin, onSuccess = {
-                            currentScreen = if (appToUnlock == "Correo") 7 else 9
-                        }, onBack = { currentScreen = 3 })
-                        7 -> MailScreen(onBack = { currentScreen = 3 })
-                        8 -> MessagesScreen(onBack = { currentScreen = 3 })
-                        9 -> SystemUpdateScreen(onFinish = { currentScreen = 2 })
-                        10 -> NotesScreen(onBack = { currentScreen = 3 })
-                        11 -> CalculatorScreen(onBack = { currentScreen = 3 })
-                        12 -> CalendarScreen(onBack = { currentScreen = 3 })
-                        13 -> ClockScreen(onBack = { currentScreen = 3 })
-                        14 -> MusicScreen(onBack = { currentScreen = 3 })
-                        15 -> WeatherScreen(onBack = { currentScreen = 3 })
-                        16 -> FilesScreen(onBack = { currentScreen = 3 })
-                        17 -> MapsScreen(onBack = { currentScreen = 3 })
-                        18 -> PhoneScreen(onBack = { currentScreen = 3 })
-                        19 -> CameraScreen(onBack = { currentScreen = 3 })
-                        20 -> InternetScreen(onBack = { currentScreen = 3 })
-                        21 -> PlayStoreScreen(onBack = { currentScreen = 3 })
+                    NavHost(navController = navController, startDestination = "login") {
+                        composable("login") {
+                            LoginScreen(
+                                onLoginSuccess = { navController.navigate("main_menu") },
+                                onNavigateToRegister = { navController.navigate("register") }
+                            )
+                        }
+                        composable("register") {
+                            RegisterScreen(
+                                onRegisterSuccess = { navController.navigate("login") },
+                                onNavigateToLogin = { navController.navigate("login") }
+                            )
+                        }
+                        composable("main_menu") {
+                            MainMenuScreen(
+                                onNewGame = { navController.navigate("fake_os") },
+                                onContinue = { navController.navigate("fake_os") },
+                                onSettings = { },
+                                onRanking = { }
+                            )
+                        }
+                        composable("fake_os") {
+                            FakeOSScreen(onAppOpened = { appName ->
+                                when (appName) {
+                                    "Sudoku" -> navController.navigate("sudoku")
+                                    "Galería" -> navController.navigate("gallery")
+                                    "Mensajes" -> navController.navigate("messages")
+                                    "Notas" -> navController.navigate("notes")
+                                    "Calculadora" -> navController.navigate("calculator")
+                                    "Calendario" -> navController.navigate("calendar")
+                                    "Reloj" -> navController.navigate("clock")
+                                    "Música" -> navController.navigate("music")
+                                    "Tiempo" -> navController.navigate("weather")
+                                    "Archivos" -> navController.navigate("files")
+                                    "Maps" -> navController.navigate("maps")
+                                    "Teléfono" -> navController.navigate("phone")
+                                    "Cámara" -> navController.navigate("camera")
+                                    "Internet" -> navController.navigate("internet")
+                                    "Play Store" -> navController.navigate("play_store")
+                                    "Correo" -> {
+                                        appToUnlock = "Correo"
+                                        requiredPin = "7429"
+                                        navController.navigate("lock_screen")
+                                    }
+                                    "System Update" -> {
+                                        appToUnlock = "System Update"
+                                        requiredPin = "0404"
+                                        navController.navigate("lock_screen")
+                                    }
+                                    else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+                        }
+                        composable("sudoku") { SudokuScreen(onBack = { navController.popBackStack() }) }
+                        composable("gallery") { GalleryScreen(onBack = { navController.popBackStack() }) }
+                        composable("lock_screen") {
+                            LockScreen(
+                                appName = appToUnlock,
+                                correctPin = requiredPin,
+                                onSuccess = {
+                                    if (appToUnlock == "Correo") navController.navigate("mail") {
+                                        popUpTo("fake_os")
+                                    } else navController.navigate("system_update") {
+                                        popUpTo("fake_os")
+                                    }
+                                },
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable("mail") { MailScreen(onBack = { navController.popBackStack() }) }
+                        composable("messages") { MessagesScreen(onBack = { navController.popBackStack() }) }
+                        composable("system_update") { SystemUpdateScreen(onFinish = { navController.navigate("main_menu") { popUpTo(0) } }) }
+                        composable("notes") { NotesScreen(onBack = { navController.popBackStack() }) }
+                        composable("calculator") { CalculatorScreen(onBack = { navController.popBackStack() }) }
+                        composable("calendar") { CalendarScreen(onBack = { navController.popBackStack() }) }
+                        composable("clock") { ClockScreen(onBack = { navController.popBackStack() }) }
+                        composable("music") { MusicScreen(onBack = { navController.popBackStack() }) }
+                        composable("weather") { WeatherScreen(onBack = { navController.popBackStack() }) }
+                        composable("files") { FilesScreen(onBack = { navController.popBackStack() }) }
+                        composable("maps") { MapsScreen(onBack = { navController.popBackStack() }) }
+                        composable("phone") { PhoneScreen(onBack = { navController.popBackStack() }) }
+                        composable("camera") { CameraScreen(onBack = { navController.popBackStack() }) }
+                        composable("internet") { InternetScreen(onBack = { navController.popBackStack() }) }
+                        composable("play_store") { PlayStoreScreen(onBack = { navController.popBackStack() }) }
                     }
                 }
             }
