@@ -65,7 +65,7 @@ fun FakeOSScreen(
         FakeApp("Sudoku", Icons.Filled.GridOn, Color(0xFF8BC34A), true),
         FakeApp("Música", Icons.Filled.MusicNote, Color(0xFFE91E63), true),
         FakeApp("Internet", Icons.Filled.Public, Color(0xFF2196F3), true),
-        FakeApp("Play Store", Icons.Filled.PlayArrow, Color(0xFF4CAF50)),
+        FakeApp("Play Store", Icons.Filled.PlayArrow, Color(0xFF4CAF50), true),
         FakeApp("Tiempo", Icons.Filled.WbSunny, Color(0xFFFFEB3B), true),
         FakeApp("Archivos", Icons.Filled.Folder, Color(0xFFFF9800), true),
         FakeApp("Maps", Icons.Filled.LocationOn, Color(0xFF4CAF50), true),
