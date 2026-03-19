@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
                                 "Teléfono" -> currentScreen = 18
                                 "Cámara" -> currentScreen = 19
                                 "Internet" -> currentScreen = 20
+                                "Play Store" -> currentScreen = 21
                                 "Correo" -> { appToUnlock = "Correo"; requiredPin = "7429"; currentScreen = 6 }
                                 "System Update" -> { appToUnlock = "System Update"; requiredPin = "0404"; currentScreen = 6 }
                                 else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
@@ -81,6 +82,7 @@ class MainActivity : ComponentActivity() {
                         18 -> PhoneScreen(onBack = { currentScreen = 3 })
                         19 -> CameraScreen(onBack = { currentScreen = 3 })
                         20 -> InternetScreen(onBack = { currentScreen = 3 })
+                        21 -> PlayStoreScreen(onBack = { currentScreen = 3 })
                     }
                 }
             }
