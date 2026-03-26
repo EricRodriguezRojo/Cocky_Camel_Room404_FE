@@ -54,6 +54,7 @@ fun Modifier.glitchEffect(isGlitching: Boolean): Modifier = composed {
             )
         }
 
+
         // 3. Dibuja las bandas de ruido o "píxeles rotos"
         noiseLines.forEach { percentY ->
             val yPos = size.height * percentY

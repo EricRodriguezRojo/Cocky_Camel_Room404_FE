@@ -78,6 +78,7 @@ data class FakeApp(
     val requiresPin: Boolean = false
 )
 
+
 @Composable
 fun FakeOSScreen(
     onAppOpened: (String) -> Unit
