@@ -38,11 +38,22 @@ class MainActivity : ComponentActivity() {
                 var requiredPin by remember { mutableStateOf("") }
                 val context = LocalContext.current
 
+                val startDestination = remember {
+                    if (SessionManager.getToken(context) != null) "main_menu" else "login"
+                }
+
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    NavHost(navController = navController, startDestination = "login") {
+                    NavHost(
+                        navController = navController,
+                        startDestination = startDestination
+                    ) {
                         composable("login") {
                             LoginScreen(
-                                onLoginSuccess = { navController.navigate("main_menu") },
+                                onLoginSuccess = {
+                                    navController.navigate("main_menu") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                },
                                 onNavigateToRegister = { navController.navigate("register") }
                             )
                         }
@@ -52,14 +63,21 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToLogin = { navController.navigate("login") }
                             )
                         }
+
                         composable("main_menu") {
                             MainMenuScreen(
                                 onNewGame = { navController.navigate("fake_os") },
                                 onContinue = { navController.navigate("fake_os") },
                                 onSettings = { },
-                                onRanking = { }
+                                onRanking = { },
+                                onLogout = {
+                                    navController.navigate("login") {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                }
                             )
                         }
+
                         composable("fake_os") {
                             FakeOSScreen(onAppOpened = { appName ->
                                 when (appName) {

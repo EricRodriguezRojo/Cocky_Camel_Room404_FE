@@ -65,7 +65,11 @@ fun LoginScreen(
                     try {
                         val response = RetrofitClient.instance.googleLogin(mapOf("idToken" to idToken))
                         if (response.isSuccessful) {
-                            Toast.makeText(context, "Acceso concedido vía Google", Toast.LENGTH_SHORT).show()
+                            val loginData = response.body()
+                            loginData?.token?.let { token ->
+                                SessionManager.saveToken(context, token)
+                            }
+                            Toast.makeText(context, loginData?.message ?: "Acceso concedido", Toast.LENGTH_SHORT).show()
                             onLoginSuccess()
                         } else {
                             Toast.makeText(context, "Error validando cuenta de Google", Toast.LENGTH_SHORT).show()
@@ -143,7 +147,11 @@ fun LoginScreen(
                                         try {
                                             val response = RetrofitClient.instance.login(username, password)
                                             if (response.isSuccessful) {
-                                                Toast.makeText(context, "Conectado al servidor", Toast.LENGTH_SHORT).show()
+                                                val loginData = response.body()
+                                                loginData?.token?.let { token ->
+                                                    SessionManager.saveToken(context, token)
+                                                }
+                                                Toast.makeText(context, loginData?.message ?: "Conectado", Toast.LENGTH_SHORT).show()
                                                 onLoginSuccess()
                                             } else {
                                                 Toast.makeText(context, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()

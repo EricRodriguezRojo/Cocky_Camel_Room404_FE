@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,10 +24,13 @@ fun MainMenuScreen(
     onNewGame: () -> Unit,
     onContinue: () -> Unit,
     onSettings: () -> Unit,
-    onRanking: () -> Unit
+    onRanking: () -> Unit,
+    onLogout: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
+
+    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -78,6 +82,26 @@ fun MainMenuScreen(
                         Spacer(modifier = Modifier.height(20.dp))
 
                         InteractionButton(text = "RANKING", onClick = onRanking)
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        OutlinedButton(
+                            onClick = {
+                                SessionManager.logout(context)
+                                onLogout()
+                            },
+                            modifier = Modifier.fillMaxWidth().height(45.dp),
+                            shape = MaterialTheme.shapes.extraSmall,
+                            border = BorderStroke(0.5.dp, Color.Red.copy(alpha = 0.4f)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red.copy(alpha = 0.7f))
+                        ) {
+                            Text(
+                                "TERMINATE_SESSION",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 2.sp
+                            )
+                        }
                     }
                 }
             }
