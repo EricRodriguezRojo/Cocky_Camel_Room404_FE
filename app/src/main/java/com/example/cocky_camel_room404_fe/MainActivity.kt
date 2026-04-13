@@ -19,6 +19,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.cocky_camel_room404_fe.ui.theme.Room404Theme
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -39,7 +45,24 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    NavHost(navController = navController, startDestination = "login") {
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = "login",
+                        enterTransition = {
+                            scaleIn(initialScale = 0.9f, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400))
+                        },
+                        exitTransition = {
+                            scaleOut(targetScale = 1.1f, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400))
+                        },
+                        popEnterTransition = {
+                            scaleIn(initialScale = 1.1f, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400))
+                        },
+                        popExitTransition = {
+                            scaleOut(targetScale = 0.9f, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400))
+                        }
+                    ) {
+
                         composable("login") {
                             LoginScreen(
                                 onLoginSuccess = { navController.navigate("main_menu") },
