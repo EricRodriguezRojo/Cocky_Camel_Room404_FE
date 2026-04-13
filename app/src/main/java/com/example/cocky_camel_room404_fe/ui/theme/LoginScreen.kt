@@ -1,10 +1,11 @@
 package com.example.cocky_camel_room404_fe
 
-import androidx.compose.animation.AnimatedVisibility
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,10 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -32,6 +38,49 @@ fun LoginScreen(
 
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
+
+    val gso = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("436902612551-pt3s24i3uth56jebunl199phsh3d30ks.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
+    }
+    val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
+
+    val googleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val idToken = account.idToken
+
+            if (idToken != null) {
+                coroutineScope.launch {
+                    isLoading = true
+                    try {
+                        val response = RetrofitClient.instance.googleLogin(mapOf("idToken" to idToken))
+                        if (response.isSuccessful) {
+                            Toast.makeText(context, "Acceso concedido vía Google", Toast.LENGTH_SHORT).show()
+                            onLoginSuccess()
+                        } else {
+                            Toast.makeText(context, "Error validando cuenta de Google", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Error de red: ${e.message}", Toast.LENGTH_SHORT).show()
+                    } finally {
+                        isLoading = false
+                    }
+                }
+            }
+        } catch (e: ApiException) {
+            Toast.makeText(context, "Inicio de sesión de Google cancelado", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -73,23 +122,62 @@ fun LoginScreen(
                         modifier = Modifier.padding(28.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        MinimalistField(value = username, onValueChange = { username = it }, label = "USER_ID")
+                        MinimalistField(value = username, onValueChange = { username = it }, label = "EMAIL_ADDRESS")
                         Spacer(modifier = Modifier.height(20.dp))
                         MinimalistField(value = password, onValueChange = { password = it }, label = "PASSKEY", isPassword = true)
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        InteractionButton(
-                            text = "ACCESS SYSTEM",
-                            onClick = onLoginSuccess
-                        )
+                        if (isLoading) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        } else {
+                            InteractionButton(
+                                text = "ACCESS SYSTEM",
+                                onClick = {
+                                    if (username.isBlank() || password.isBlank()) {
+                                        Toast.makeText(context, "Faltan credenciales", Toast.LENGTH_SHORT).show()
+                                        return@InteractionButton
+                                    }
+
+                                    coroutineScope.launch {
+                                        isLoading = true
+                                        try {
+                                            val response = RetrofitClient.instance.login(username, password)
+                                            if (response.isSuccessful) {
+                                                Toast.makeText(context, "Conectado al servidor", Toast.LENGTH_SHORT).show()
+                                                onLoginSuccess()
+                                            } else {
+                                                Toast.makeText(context, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
+                                            }
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Error crítico: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        } finally {
+                                            isLoading = false
+                                        }
+                                    }
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("OR", color = Color.White.copy(alpha = 0.3f), fontSize = 10.sp)
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            OutlinedButton(
+                                onClick = {
+                                    googleLauncher.launch(googleSignInClient.signInIntent)
+                                },
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                shape = MaterialTheme.shapes.extraSmall,
+                                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.3f))
+                            ) {
+                                Text("CONTINUE WITH GOOGLE", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                            }
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                TextButton(onClick = {
-                    onNavigateToRegister()
-                }) {
+                TextButton(onClick = onNavigateToRegister) {
                     Text(
                         "CREATE NEW CREDENTIALS",
                         color = Color.White.copy(alpha = 0.5f),
@@ -101,6 +189,7 @@ fun LoginScreen(
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,8 +224,6 @@ fun MinimalistField(
 fun InteractionButton(text: String, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-
-    // Animación: Si se presiona, se encoge un poco (0.96f)
     val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f)
 
     Button(
@@ -145,8 +232,8 @@ fun InteractionButton(text: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
-            .scale(scale), // Aplicamos la animación de escala
-        shape = MaterialTheme.shapes.extraSmall, // Bordes más rectos = más técnico
+            .scale(scale),
+        shape = MaterialTheme.shapes.extraSmall,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = Color.Black
