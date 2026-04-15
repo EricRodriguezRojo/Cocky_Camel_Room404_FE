@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.LocationOn
@@ -114,7 +115,8 @@ fun FakeOSScreen(
         FakeApp("Tiempo", Icons.Filled.WbSunny, Color(0xFFFFEB3B), true),
         FakeApp("Archivos", Icons.Filled.Folder, Color(0xFFFF9800), true),
         FakeApp("Maps", Icons.Filled.LocationOn, Color(0xFF4CAF50), true),
-        FakeApp("System Update", Icons.Filled.Warning, Color(0xFFFF0000), true, true)
+        FakeApp("System Update", Icons.Filled.Warning, Color(0xFFFF0000), true, true),
+        FakeApp("EXIT", Icons.Filled.ExitToApp, Color(0xFF18D234), true)
     )
 
     val dockApps = listOf(
