@@ -2,6 +2,7 @@ package com.example.cocky_camel_room404_fe
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Send
@@ -19,14 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.border
-import androidx.compose.ui.text.style.TextAlign
 
 data class Chat(val id: String, val name: String, val lastMessage: String, val time: String)
 data class Message(val text: String, val isFromMe: Boolean)
@@ -34,6 +36,9 @@ data class Message(val text: String, val isFromMe: Boolean)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesScreen(onBack: () -> Unit) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     val chats = listOf(
         Chat("1", "Desconocido", "¿Lo has encontrado ya?", "11:45"),
         Chat("2", "Mamá", "Acuérdate de comprar pan.", "Ayer"),
@@ -49,8 +54,6 @@ fun MessagesScreen(onBack: () -> Unit) {
     var showGlitchOverlay by remember { mutableStateOf(false) }
     var showSystemMessage by remember { mutableStateOf(false) }
 
-    val coroutineScope = rememberCoroutineScope()
-
     val infiniteTransition = rememberInfiniteTransition(label = "")
     val offsetX by infiniteTransition.animateFloat(
         initialValue = if (isGlitching) -15f else 0f,
@@ -61,6 +64,7 @@ fun MessagesScreen(onBack: () -> Unit) {
         ),
         label = ""
     )
+
     val colorOverlay = if (showGlitchOverlay) Color.Red.copy(alpha = 0.4f) else Color.Transparent
 
     LaunchedEffect(currentChat) {
@@ -72,9 +76,7 @@ fun MessagesScreen(onBack: () -> Unit) {
                 Message("¿Lo has encontrado ya?", false)
             )
         } else if (currentChat != null) {
-            chatMessages = listOf(
-                Message(currentChat!!.lastMessage, false)
-            )
+            chatMessages = listOf(Message(currentChat!!.lastMessage, false))
         }
     }
 
@@ -82,9 +84,7 @@ fun MessagesScreen(onBack: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF121212))
-            .graphicsLayer {
-                translationX = offsetX
-            }
+            .graphicsLayer { translationX = offsetX }
     ) {
         if (currentChat == null) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -111,7 +111,7 @@ fun MessagesScreen(onBack: () -> Unit) {
                                 modifier = Modifier
                                     .size(48.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF03A9F4)),
+                                    .background(if(chat.id == "1") Color.Red else Color(0xFF03A9F4)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(Icons.Filled.Person, contentDescription = null, tint = Color.White)
@@ -208,14 +208,23 @@ fun MessagesScreen(onBack: () -> Unit) {
 
                                 if (currentChat?.id == "1" && textSent.equals("malware", ignoreCase = true)) {
                                     coroutineScope.launch {
-                                        delay(500)
+                                        try {
+                                            val token = SessionManager.getToken(context)
+                                            if (token != null) {
+                                                RetrofitClient.instance.triggerMalware("Bearer $token")
+                                            }
+                                        } catch (e: Exception) {}
+                                    }
+
+                                    coroutineScope.launch {
+                                        delay(300)
                                         isGlitching = true
                                         showGlitchOverlay = true
-                                        delay(1500)
+                                        delay(1000)
                                         isGlitching = false
                                         showGlitchOverlay = false
                                         showSystemMessage = true
-                                        delay(3000)
+                                        delay(4500)
                                         showSystemMessage = false
                                     }
                                 }
@@ -241,24 +250,34 @@ fun MessagesScreen(onBack: () -> Unit) {
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
+                        .fillMaxWidth(0.85f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.Black.copy(alpha = 0.9f))
-                        .border(1.dp, Color.Red, RoundedCornerShape(12.dp))
+                        .background(Color.Black.copy(alpha = 0.95f))
+                        .border(2.dp, Color.Red, RoundedCornerShape(12.dp))
                         .padding(24.dp)
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "SYSTEM OVERRIDE",
+                            text = "SYSTEM_OVERRIDE",
                             color = Color.Red,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Has forzado una brecha de seguridad. El sistema ha generado un enigma de recuperación.",
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 20.sp
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Solicitud de reinicio enviada al administrador externo.",
-                            color = Color.White,
-                            fontSize = 16.sp,
+                            text = "REVISA TU BANDEJA DE ENTRADA REAL.",
+                            color = Color.Red,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
                     }

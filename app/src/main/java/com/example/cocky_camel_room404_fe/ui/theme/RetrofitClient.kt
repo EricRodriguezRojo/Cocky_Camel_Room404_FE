@@ -6,8 +6,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+
 
 data class LoginResponse(
     val token: String?,
@@ -22,6 +24,7 @@ data class User(
     val isPremium: Boolean = false
 )
 
+
 interface Room404Api {
     @POST("api/user/login/{email}/{password}")
     suspend fun login(
@@ -34,7 +37,13 @@ interface Room404Api {
 
     @POST("api/user/google-login")
     suspend fun googleLogin(@Body data: Map<String, String>): Response<LoginResponse>
+
+    @POST("api/game/trigger-malware")
+    suspend fun triggerMalware(
+        @Header("Authorization") token: String
+    ): Response<Map<String, String>>
 }
+
 
 object RetrofitClient {
     private const val BASE_URL = "http://10.0.2.2:8080/"
