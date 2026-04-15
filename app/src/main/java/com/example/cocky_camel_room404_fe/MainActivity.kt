@@ -106,6 +106,7 @@ class MainActivity : ComponentActivity() {
                                         requiredPin = "0404"
                                         navController.navigate("lock_screen")
                                     }
+                                    "EXIT" -> navController.navigate("main_menu")
                                     else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
                                 }
                             })
