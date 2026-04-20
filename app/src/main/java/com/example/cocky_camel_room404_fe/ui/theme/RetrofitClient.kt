@@ -6,14 +6,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
-
 
 data class LoginResponse(
     val token: String?,
-    val message: String
+    val message: String,
+    val role: String? = "User"
 )
 
 data class User(
@@ -24,6 +27,11 @@ data class User(
     val isPremium: Boolean = false
 )
 
+data class FakeEmailDto(
+    val id: Int? = null,
+    val sender: String,
+    val bodyText: String
+)
 
 interface Room404Api {
     @POST("api/user/login/{email}/{password}")
@@ -42,8 +50,19 @@ interface Room404Api {
     suspend fun triggerMalware(
         @Header("Authorization") token: String
     ): Response<Map<String, String>>
-}
 
+    @GET("api/emails")
+    suspend fun getEmails(): Response<List<FakeEmailDto>>
+
+    @POST("api/emails")
+    suspend fun createEmail(@Body email: FakeEmailDto): Response<FakeEmailDto>
+
+    @PUT("api/emails/{id}")
+    suspend fun updateEmail(@Path("id") id: Int, @Body email: FakeEmailDto): Response<FakeEmailDto>
+
+    @DELETE("api/emails/{id}")
+    suspend fun deleteEmail(@Path("id") id: Int): Response<Void>
+}
 
 object RetrofitClient {
     private const val BASE_URL = "http://10.0.2.2:8080/"

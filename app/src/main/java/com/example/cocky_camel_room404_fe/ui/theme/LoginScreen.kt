@@ -69,6 +69,9 @@ fun LoginScreen(
                             loginData?.token?.let { token ->
                                 SessionManager.saveToken(context, token)
                             }
+                            val userRole = loginData?.role ?: "User"
+                            SessionManager.saveRole(context, userRole)
+
                             Toast.makeText(context, loginData?.message ?: "Acceso concedido", Toast.LENGTH_SHORT).show()
                             onLoginSuccess()
                         } else {
@@ -145,12 +148,17 @@ fun LoginScreen(
                                     coroutineScope.launch {
                                         isLoading = true
                                         try {
+                                            // LÍNEA CORREGIDA
                                             val response = RetrofitClient.instance.login(username, password)
+
                                             if (response.isSuccessful) {
                                                 val loginData = response.body()
                                                 loginData?.token?.let { token ->
                                                     SessionManager.saveToken(context, token)
                                                 }
+                                                val userRole = loginData?.role ?: "User"
+                                                SessionManager.saveRole(context, userRole)
+
                                                 Toast.makeText(context, loginData?.message ?: "Conectado", Toast.LENGTH_SHORT).show()
                                                 onLoginSuccess()
                                             } else {
@@ -197,7 +205,6 @@ fun LoginScreen(
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
