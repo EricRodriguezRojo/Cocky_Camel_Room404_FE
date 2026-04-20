@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 object SessionManager {
     private const val PREFS_NAME = "room404_prefs"
     private const val KEY_TOKEN = "jwt_token"
+    private const val KEY_ROLE = "user_role"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -19,7 +20,15 @@ object SessionManager {
         return getPrefs(context).getString(KEY_TOKEN, null)
     }
 
+    fun saveRole(context: Context, role: String) {
+        getPrefs(context).edit().putString(KEY_ROLE, role).apply()
+    }
+
+    fun getRole(context: Context): String {
+        return getPrefs(context).getString(KEY_ROLE, "User") ?: "User"
+    }
+
     fun logout(context: Context) {
-        getPrefs(context).edit().remove(KEY_TOKEN).apply()
+        getPrefs(context).edit().clear().apply()
     }
 }

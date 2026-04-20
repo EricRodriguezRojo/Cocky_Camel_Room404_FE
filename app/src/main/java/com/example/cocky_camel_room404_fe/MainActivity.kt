@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
                                 onSettings = { },
                                 onRanking = { },
                                 onLogout = {
+                                    SessionManager.logout(context)
                                     navController.navigate("login") {
                                         popUpTo(0) { inclusive = true }
                                     }
@@ -118,16 +119,22 @@ class MainActivity : ComponentActivity() {
                                 appName = appToUnlock,
                                 correctPin = requiredPin,
                                 onSuccess = {
-                                    if (appToUnlock == "Correo") navController.navigate("mail") {
-                                        popUpTo("fake_os")
-                                    } else navController.navigate("system_update") {
-                                        popUpTo("fake_os")
+                                    if (appToUnlock == "Correo") {
+                                        val userRole = SessionManager.getRole(context)
+                                        if (userRole == "Admin") {
+                                            navController.navigate("admin_mail") { popUpTo("fake_os") }
+                                        } else {
+                                            navController.navigate("mail") { popUpTo("fake_os") }
+                                        }
+                                    } else {
+                                        navController.navigate("system_update") { popUpTo("fake_os") }
                                     }
                                 },
                                 onBack = { navController.popBackStack() }
                             )
                         }
                         composable("mail") { MailScreen(onBack = { navController.popBackStack() }) }
+                        composable("admin_mail") { AdminMailScreen(onBack = { navController.popBackStack() }) }
                         composable("messages") { MessagesScreen(onBack = { navController.popBackStack() }) }
                         composable("system_update") { SystemUpdateScreen(onFinish = { navController.navigate("main_menu") { popUpTo(0) } }) }
                         composable("notes") { NotesScreen(onBack = { navController.popBackStack() }) }
