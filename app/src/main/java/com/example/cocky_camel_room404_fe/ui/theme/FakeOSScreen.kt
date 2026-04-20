@@ -19,6 +19,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccessTime
@@ -62,9 +65,11 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,7 +83,6 @@ data class FakeApp(
     val isFunctional: Boolean = false,
     val requiresPin: Boolean = false
 )
-
 
 @Composable
 fun FakeOSScreen(
@@ -205,6 +209,10 @@ fun FakeOSScreen(
 
 @Composable
 fun FakeGoogleSearchBar() {
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    var searchQuery by remember { mutableStateOf("") }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -215,15 +223,54 @@ fun FakeGoogleSearchBar() {
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Filled.Search, contentDescription = null, tint = Color.White)
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = "Buscar...",
-            color = Color.LightGray,
-            fontSize = 16.sp,
-            modifier = Modifier.weight(1f)
+        Icon(
+            imageVector = Icons.Filled.Search,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.clickable {
+                if (searchQuery.isNotEmpty()) {
+                    Toast.makeText(context, "Error de conexión de red", Toast.LENGTH_SHORT).show()
+                    focusManager.clearFocus()
+                }
+            }
         )
-        Icon(Icons.Filled.Mic, contentDescription = null, tint = Color.LightGray)
+        Spacer(modifier = Modifier.width(12.dp))
+
+        BasicTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier.weight(1f),
+            textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    Toast.makeText(context, "Error de conexión de red", Toast.LENGTH_SHORT).show()
+                    focusManager.clearFocus()
+                }
+            ),
+            decorationBox = { innerTextField ->
+                Box(contentAlignment = Alignment.CenterStart) {
+                    if (searchQuery.isEmpty()) {
+                        Text(
+                            text = "Buscar...",
+                            color = Color.LightGray,
+                            fontSize = 16.sp
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+        )
+
+        Icon(
+            imageVector = Icons.Filled.Mic,
+            contentDescription = null,
+            tint = Color.LightGray,
+            modifier = Modifier.clickable {
+                Toast.makeText(context, "El micrófono no responde", Toast.LENGTH_SHORT).show()
+            }
+        )
     }
 }
 
