@@ -89,17 +89,13 @@ fun FakeOSScreen(
     onAppOpened: (String) -> Unit
 ) {
     val context = LocalContext.current
-
     var isGlitching by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         while (true) {
             delay(Random.nextLong(5000, 15000))
-
             isGlitching = true
-
             delay(Random.nextLong(300, 800))
-
             isGlitching = false
         }
     }

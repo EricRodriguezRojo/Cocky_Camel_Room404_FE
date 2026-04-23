@@ -18,65 +18,130 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 data class FileItem(val name: String, val icon: ImageVector, val isFolder: Boolean, val size: String = "")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilesScreen(onBack: () -> Unit) {
+fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isInstalling by remember { mutableStateOf(false) }
+    var installProgress by remember { mutableStateOf(0f) }
+
     val items = listOf(
         FileItem("Android", Icons.Default.Folder, true),
-        FileItem("DCIM", Icons.Default.Folder, true),
-        FileItem("Documents", Icons.Default.Folder, true),
-        FileItem("Downloads", Icons.Default.Folder, true),
-        FileItem("Pictures", Icons.Default.Folder, true),
         FileItem(".sys_cache", Icons.Default.Folder, true),
+        FileItem("gallery_fix_v2.apk", Icons.Default.Android, false, "1.2 MB"),
         FileItem("config_backup.txt", Icons.Default.Description, false, "12 KB"),
         FileItem("root_exploit.sh", Icons.Default.Code, false, "4 KB")
     )
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
-        TopAppBar(
-            title = { Text("Archivos", color = Color.White) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
-        )
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = { Text("Almacenamiento Interno", color = Color.White) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
+            )
 
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(items) { item ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            if (item.name == ".sys_cache") {
-                                Toast.makeText(context, "ACCESO DENEGADO: Permisos de root requeridos", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "Carpeta vacía o archivo corrupto", Toast.LENGTH_SHORT).show()
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(items) { item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                when (item.name) {
+                                    "gallery_fix_v2.apk" -> {
+                                        isInstalling = true
+                                    }
+                                    ".sys_cache" -> {
+                                        Toast.makeText(context, "ACCESO DENEGADO: Permisos de root requeridos", Toast.LENGTH_SHORT).show()
+                                    }
+                                    else -> {
+                                        Toast.makeText(context, "Archivo protegido o corrupto", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            item.icon,
+                            contentDescription = null,
+                            tint = if (item.name.contains("apk")) Color(0xFF4CAF50)
+                            else if (item.name.startsWith(".")) Color.Red
+                            else Color(0xFF03A9F4),
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(text = item.name, color = Color.White, fontSize = 16.sp)
+                            if (!item.isFolder) {
+                                Text(text = item.size, color = Color.Gray, fontSize = 12.sp)
                             }
                         }
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        item.icon,
-                        contentDescription = null,
-                        tint = if (item.name.startsWith(".")) Color.Red else Color(0xFF03A9F4),
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(text = item.name, color = Color.White, fontSize = 16.sp)
-                        if (!item.isFolder) {
-                            Text(text = item.size, color = Color.Gray, fontSize = 12.sp)
-                        }
                     }
+                    HorizontalDivider(color = Color.DarkGray, thickness = 0.5.dp)
                 }
-                Divider(color = Color.DarkGray, thickness = 0.5.dp)
+            }
+        }
+
+        if (isInstalling) {
+            LaunchedEffect(Unit) {
+                while (installProgress < 1f) {
+                    delay(50)
+                    installProgress += 0.02f
+                }
+
+                val segundos = TimeTracker.getSecondsElapsedAndReset()
+                try {
+                    val token = SessionManager.getToken(context)
+                    if (token != null) {
+                        RetrofitClient.instance.completePuzzle(
+                            token = "Bearer $token",
+                            puzzleName = "Gallery Patch",
+                            body = mapOf("timeSeconds" to segundos)
+                        )
+                    }
+                } catch (e: Exception) {
+                }
+
+                onPatchInstalled()
+                isInstalling = false
+                Toast.makeText(context, "Galería actualizada con éxito", Toast.LENGTH_LONG).show()
+            }
+
+            Box(
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.85f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(
+                        progress = { installProgress },
+                        color = Color(0xFF4CAF50),
+                        strokeWidth = 4.dp
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Instalando parche de sistema...",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "${(installProgress * 100).toInt()}%",
+                        color = Color(0xFF4CAF50),
+                        fontSize = 18.sp
+                    )
+                }
             }
         }
     }

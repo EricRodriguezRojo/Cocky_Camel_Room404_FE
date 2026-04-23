@@ -1,5 +1,6 @@
 package com.example.cocky_camel_room404_fe
 
+import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -207,24 +208,35 @@ fun MessagesScreen(onBack: () -> Unit) {
                                 inputText = ""
 
                                 if (currentChat?.id == "1" && textSent.equals("malware", ignoreCase = true)) {
+
+                                    val segundosTardados = TimeTracker.getSecondsElapsedAndReset()
+
                                     coroutineScope.launch {
                                         try {
                                             val token = SessionManager.getToken(context)
                                             if (token != null) {
                                                 RetrofitClient.instance.triggerMalware("Bearer $token")
+                                                RetrofitClient.instance.completePuzzle(
+                                                    token = "Bearer $token",
+                                                    puzzleName = "Malware Enigma",
+                                                    body = mapOf("timeSeconds" to segundosTardados)
+                                                )
                                             }
-                                        } catch (e: Exception) {}
+                                        } catch (e: Exception) {
+                                        }
                                     }
 
                                     coroutineScope.launch {
-                                        delay(300)
                                         isGlitching = true
                                         showGlitchOverlay = true
-                                        delay(1000)
+
+                                        delay(800)
+
                                         isGlitching = false
                                         showGlitchOverlay = false
+
                                         showSystemMessage = true
-                                        delay(4500)
+                                        delay(4000)
                                         showSystemMessage = false
                                     }
                                 }

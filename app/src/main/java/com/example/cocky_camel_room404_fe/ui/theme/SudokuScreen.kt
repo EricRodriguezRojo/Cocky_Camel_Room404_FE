@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SudokuScreen(onBack: () -> Unit) {
-    val initialBoard = listOf(
+    val initialBoard = remember { listOf(
         listOf(5, 3, 0, 0, 7, 0, 0, 0, 0),
         listOf(6, 0, 0, 1, 9, 5, 0, 0, 0),
         listOf(0, 9, 8, 0, 0, 0, 0, 6, 0),
@@ -30,9 +30,9 @@ fun SudokuScreen(onBack: () -> Unit) {
         listOf(0, 6, 0, 0, 0, 0, 2, 8, 0),
         listOf(0, 0, 0, 4, 1, 9, 0, 0, 5),
         listOf(0, 0, 0, 0, 8, 0, 0, 7, 9)
-    )
+    )}
 
-    val solvedBoard = listOf(
+    val solvedBoard = remember { listOf(
         listOf(5, 3, 4, 6, 7, 8, 9, 1, 2),
         listOf(6, 7, 2, 1, 9, 5, 3, 4, 8),
         listOf(1, 9, 8, 3, 4, 2, 5, 6, 7),
@@ -42,11 +42,10 @@ fun SudokuScreen(onBack: () -> Unit) {
         listOf(9, 6, 1, 5, 3, 7, 2, 8, 4),
         listOf(2, 8, 7, 4, 1, 9, 6, 3, 5),
         listOf(3, 4, 5, 2, 8, 6, 1, 7, 9)
-    )
+    )}
 
     var board by remember { mutableStateOf(initialBoard.map { it.toMutableList() }) }
     var selectedCell by remember { mutableStateOf<Pair<Int, Int>?>(null) }
-
     var hintsRemaining by remember { mutableStateOf(3) }
     var showDialog by remember { mutableStateOf(false) }
     var isSuccess by remember { mutableStateOf(false) }
@@ -60,18 +59,13 @@ fun SudokuScreen(onBack: () -> Unit) {
                 if (board[r][c] != 0 && board[r][c] != solvedBoard[r][c]) isCorrect = false
             }
         }
-
         if (isFull) {
             isSuccess = isCorrect
             showDialog = true
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0D0D0D))
-    ) {
+    Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0D0D0D))) {
         TopAppBar(
             title = { Text("Sudoku Pro", color = Color.White) },
             navigationIcon = {
@@ -83,19 +77,15 @@ fun SudokuScreen(onBack: () -> Unit) {
         )
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Pistas restantes: $hintsRemaining",
                 color = if (hintsRemaining > 0) Color.LightGray else Color.Red,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                fontSize = 16.sp
             )
-
             Button(
                 onClick = {
                     if (hintsRemaining > 0 && selectedCell != null) {
@@ -110,16 +100,13 @@ fun SudokuScreen(onBack: () -> Unit) {
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF8F00)),
-                enabled = hintsRemaining > 0 && selectedCell != null,
-                shape = RoundedCornerShape(50)
+                enabled = hintsRemaining > 0 && selectedCell != null
             ) {
-                Icon(Icons.Filled.Lightbulb, contentDescription = "Pista", tint = Color.White)
+                Icon(Icons.Filled.Info, null, tint = Color.White)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Usar Pista")
+                Text("Pista")
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Box(
             modifier = Modifier
@@ -131,35 +118,21 @@ fun SudokuScreen(onBack: () -> Unit) {
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 for (row in 0 until 9) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
                         for (col in 0 until 9) {
                             val isInitial = initialBoard[row][col] != 0
                             val isSelected = selectedCell == Pair(row, col)
                             val value = board[row][col]
+                            val isWrong = !isInitial && value != 0 && value != solvedBoard[row][col]
 
                             Box(
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                                    .border(0.5.dp, Color.DarkGray) // <--- AQUÍ ESTÁ EL ARREGLO DE LAS LÍNEAS
-                                    .background(
-                                        when {
-                                            isSelected -> Color(0xFF3A3A3A) // Gris claro para la selección
-                                            else -> Color.Transparent
-                                        }
-                                    )
-                                    .clickable {
-                                        if (!isInitial) selectedCell = Pair(row, col)
-                                    },
+                                    .weight(1f).fillMaxHeight().border(0.5.dp, Color.DarkGray)
+                                    .background(if (isSelected) Color(0xFF3A3A3A) else Color.Transparent)
+                                    .clickable { if (!isInitial) selectedCell = Pair(row, col) },
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (value != 0) {
-                                    val isWrong = !isInitial && board[row][col] != solvedBoard[row][col] && board[row][col] != 0
-
                                     Text(
                                         text = value.toString(),
                                         color = when {
@@ -196,19 +169,11 @@ fun SudokuScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val numbers = listOf(1..5, 6..9)
-            for (rowNumbers in numbers) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    for (num in rowNumbers) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val rows = listOf(1..5, 6..9)
+            for (range in rows) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (num in range) {
                         Button(
                             onClick = {
                                 selectedCell?.let { (r, c) ->
@@ -218,16 +183,14 @@ fun SudokuScreen(onBack: () -> Unit) {
                                     validateBoard()
                                 }
                             },
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f),
+                            modifier = Modifier.weight(1f).aspectRatio(1f),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A))
                         ) {
-                            Text(num.toString(), color = Color.White, fontSize = 24.sp)
+                            Text(num.toString(), fontSize = 22.sp)
                         }
                     }
-                    if (rowNumbers == 6..9) {
+                    if (range == 6..9) {
                         Button(
                             onClick = {
                                 selectedCell?.let { (r, c) ->
@@ -236,13 +199,11 @@ fun SudokuScreen(onBack: () -> Unit) {
                                     board = newBoard
                                 }
                             },
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f),
+                            modifier = Modifier.weight(1f).aspectRatio(1f),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF6679))
                         ) {
-                            Text("X", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                            Text("X", fontSize = 22.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -254,29 +215,10 @@ fun SudokuScreen(onBack: () -> Unit) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = {
-                Text(
-                    text = if (isSuccess) "¡Sistema Desbloqueado!" else "Error de Secuencia",
-                    color = if (isSuccess) Color(0xFF4CAF50) else Color(0xFFCF6679)
-                )
-            },
-            text = {
-                Text(
-                    text = if (isSuccess) "Has completado el tablero correctamente. Acceso concedido."
-                    else "El tablero está lleno pero hay números incorrectos. Revisa las casillas en rojo.",
-                    color = Color.White
-                )
-            },
+            title = { Text(if (isSuccess) "¡Sistema Desbloqueado!" else "Error de Secuencia", color = if (isSuccess) Color(0xFF4CAF50) else Color(0xFFCF6679)) },
+            text = { Text(if (isSuccess) "Has completado el tablero correctamente." else "Hay números incorrectos. Revísalos.", color = Color.White) },
             confirmButton = {
-                Button(
-                    onClick = {
-                        showDialog = false
-                        if (isSuccess) onBack()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = if (isSuccess) Color(0xFF4CAF50) else Color.Gray)
-                ) {
-                    Text(if (isSuccess) "Continuar" else "Revisar")
-                }
+                Button(onClick = { showDialog = false; if (isSuccess) onBack() }) { Text("OK") }
             },
             containerColor = Color(0xFF1E1E1E)
         )
