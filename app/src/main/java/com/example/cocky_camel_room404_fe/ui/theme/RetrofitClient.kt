@@ -33,6 +33,12 @@ data class FakeEmailDto(
     val bodyText: String
 )
 
+data class RankingDto(
+    val nickname: String,
+    val totalPoints: Long,
+    val totalTime: Long
+)
+
 interface Room404Api {
     @POST("api/user/login/{email}/{password}")
     suspend fun login(
@@ -62,6 +68,16 @@ interface Room404Api {
 
     @DELETE("api/emails/{id}")
     suspend fun deleteEmail(@Path("id") id: Int): Response<Void>
+
+    @POST("api/progress/complete/{puzzleName}")
+    suspend fun completePuzzle(
+        @Header("Authorization") token: String,
+        @Path("puzzleName") puzzleName: String,
+        @Body body: Map<String, Int>
+    ): Response<Map<String, String>>
+
+    @GET("api/ranking")
+    suspend fun getRanking(): Response<List<RankingDto>>
 }
 
 object RetrofitClient {

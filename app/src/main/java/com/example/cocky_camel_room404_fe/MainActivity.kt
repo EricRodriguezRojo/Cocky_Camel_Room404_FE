@@ -18,11 +18,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.cocky_camel_room404_fe.ui.theme.Room404Theme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
-
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -36,54 +36,41 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 var appToUnlock by remember { mutableStateOf("") }
                 var requiredPin by remember { mutableStateOf("") }
+                var isGalleryPatched by remember { mutableStateOf(false) }
+
                 val context = LocalContext.current
+                val scope = rememberCoroutineScope()
 
                 val startDestination = remember {
                     if (SessionManager.getToken(context) != null) "main_menu" else "login"
                 }
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = startDestination
-                    ) {
-                        composable("login") {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    navController.navigate("main_menu") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
-                                },
-                                onNavigateToRegister = { navController.navigate("register") }
-                            )
-                        }
-                        composable("register") {
-                            RegisterScreen(
-                                onRegisterSuccess = { navController.navigate("login") },
-                                onNavigateToLogin = { navController.navigate("login") }
-                            )
-                        }
+                    NavHost(navController = navController, startDestination = startDestination) {
+                        composable("login") { LoginScreen(onLoginSuccess = { navController.navigate("main_menu") { popUpTo("login") { inclusive = true } } }, onNavigateToRegister = { navController.navigate("register") }) }
+                        composable("register") { RegisterScreen(onRegisterSuccess = { navController.navigate("login") }, onNavigateToLogin = { navController.navigate("login") }) }
 
                         composable("main_menu") {
                             MainMenuScreen(
-                                onNewGame = { navController.navigate("fake_os") },
-                                onContinue = { navController.navigate("fake_os") },
+                                onNewGame = { TimeTracker.forceReset(); TimeTracker.start(); navController.navigate("fake_os") },
+                                onContinue = { TimeTracker.start(); navController.navigate("fake_os") },
                                 onSettings = { },
-                                onRanking = { },
-                                onLogout = {
-                                    SessionManager.logout(context)
-                                    navController.navigate("login") {
-                                        popUpTo(0) { inclusive = true }
-                                    }
-                                }
+                                onRanking = { navController.navigate("ranking") },
+                                onLogout = { SessionManager.logout(context); navController.navigate("login") { popUpTo(0) { inclusive = true } } }
                             )
                         }
+
+                        composable("ranking") { RankingScreen(onBack = { navController.popBackStack() }) }
 
                         composable("fake_os") {
                             FakeOSScreen(onAppOpened = { appName ->
                                 when (appName) {
+                                    "Archivos" -> { appToUnlock = "Archivos"; requiredPin = "0024"; navController.navigate("lock_screen") }
+                                    "Galería" -> {
+                                        if (isGalleryPatched) navController.navigate("gallery")
+                                        else Toast.makeText(context, "ERROR: App corrupta. Reinstale vía APK.", Toast.LENGTH_LONG).show()
+                                    }
                                     "Sudoku" -> navController.navigate("sudoku")
-                                    "Galería" -> navController.navigate("gallery")
                                     "Mensajes" -> navController.navigate("messages")
                                     "Notas" -> navController.navigate("notes")
                                     "Calculadora" -> navController.navigate("calculator")
@@ -91,48 +78,55 @@ class MainActivity : ComponentActivity() {
                                     "Reloj" -> navController.navigate("clock")
                                     "Música" -> navController.navigate("music")
                                     "Tiempo" -> navController.navigate("weather")
-                                    "Archivos" -> navController.navigate("files")
                                     "Maps" -> navController.navigate("maps")
                                     "Teléfono" -> navController.navigate("phone")
                                     "Cámara" -> navController.navigate("camera")
                                     "Internet" -> navController.navigate("internet")
                                     "Play Store" -> navController.navigate("play_store")
-                                    "Correo" -> {
-                                        appToUnlock = "Correo"
-                                        requiredPin = "7429"
-                                        navController.navigate("lock_screen")
-                                    }
-                                    "System Update" -> {
-                                        appToUnlock = "System Update"
-                                        requiredPin = "0404"
-                                        navController.navigate("lock_screen")
-                                    }
+                                    "Correo" -> { appToUnlock = "Correo"; requiredPin = "7429"; navController.navigate("lock_screen") }
+                                    "System Update" -> { appToUnlock = "System Update"; requiredPin = "0404"; navController.navigate("lock_screen") }
                                     "EXIT" -> navController.navigate("main_menu")
                                     else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
                                 }
                             })
                         }
-                        composable("sudoku") { SudokuScreen(onBack = { navController.popBackStack() }) }
-                        composable("gallery") { GalleryScreen(onBack = { navController.popBackStack() }) }
+
                         composable("lock_screen") {
                             LockScreen(
                                 appName = appToUnlock,
                                 correctPin = requiredPin,
                                 onSuccess = {
-                                    if (appToUnlock == "Correo") {
-                                        val userRole = SessionManager.getRole(context)
-                                        if (userRole == "Admin") {
-                                            navController.navigate("admin_mail") { popUpTo("fake_os") }
-                                        } else {
-                                            navController.navigate("mail") { popUpTo("fake_os") }
+                                    val segundos = TimeTracker.getSecondsElapsedAndReset()
+                                    scope.launch {
+                                        try {
+                                            val token = SessionManager.getToken(context)
+                                            if (token != null) {
+                                                val pName = when(appToUnlock) {
+                                                    "Correo" -> "Mail Access"
+                                                    "Archivos" -> "System Breach"
+                                                    else -> "System Override"
+                                                }
+                                                RetrofitClient.instance.completePuzzle(token = "Bearer $token", puzzleName = pName, body = mapOf("timeSeconds" to segundos))
+                                            }
+                                        } catch (e: Exception) {}
+                                    }
+
+                                    when (appToUnlock) {
+                                        "Correo" -> {
+                                            if (SessionManager.getRole(context) == "Admin") navController.navigate("admin_mail") { popUpTo("fake_os") }
+                                            else navController.navigate("mail") { popUpTo("fake_os") }
                                         }
-                                    } else {
-                                        navController.navigate("system_update") { popUpTo("fake_os") }
+                                        "Archivos" -> navController.navigate("files") { popUpTo("fake_os") }
+                                        else -> navController.navigate("system_update") { popUpTo("fake_os") }
                                     }
                                 },
                                 onBack = { navController.popBackStack() }
                             )
                         }
+
+                        composable("files") { FilesScreen(onBack = { navController.popBackStack() }, onPatchInstalled = { isGalleryPatched = true }) }
+                        composable("sudoku") { SudokuScreen(onBack = { navController.popBackStack() }) }
+                        composable("gallery") { GalleryScreen(onBack = { navController.popBackStack() }) }
                         composable("mail") { MailScreen(onBack = { navController.popBackStack() }) }
                         composable("admin_mail") { AdminMailScreen(onBack = { navController.popBackStack() }) }
                         composable("messages") { MessagesScreen(onBack = { navController.popBackStack() }) }
@@ -143,7 +137,6 @@ class MainActivity : ComponentActivity() {
                         composable("clock") { ClockScreen(onBack = { navController.popBackStack() }) }
                         composable("music") { MusicScreen(onBack = { navController.popBackStack() }) }
                         composable("weather") { WeatherScreen(onBack = { navController.popBackStack() }) }
-                        composable("files") { FilesScreen(onBack = { navController.popBackStack() }) }
                         composable("maps") { MapsScreen(onBack = { navController.popBackStack() }) }
                         composable("phone") { PhoneScreen(onBack = { navController.popBackStack() }) }
                         composable("camera") { CameraScreen(onBack = { navController.popBackStack() }) }

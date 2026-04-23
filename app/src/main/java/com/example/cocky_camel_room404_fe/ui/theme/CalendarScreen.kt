@@ -27,22 +27,22 @@ data class CalendarEvent(val day: Int, val title: String, val time: String, val 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(onBack: () -> Unit) {
-    var selectedDay by remember { mutableStateOf(10) }
+    var selectedDay by remember { mutableStateOf(22) }
 
     val events = listOf(
         CalendarEvent(3, "Dentista", "16:00", "Revisión anual. Llevar radiografías."),
         CalendarEvent(7, "Examen DAM", "09:00", "Entregar el proyecto a primera hora."),
         CalendarEvent(10, "DÍA CERO", "00:00", "No debí descargar ese archivo. El teléfono hace cosas raras."),
         CalendarEvent(10, "Comprar pan", "14:00", "2 barras integrales."),
+        CalendarEvent(22, "Llamar a 'The Architect' - 6295", "18:30", "Él sabe cómo entrar en el sistema de archivos. Dice que tiene el parche de la galería listo."),
         CalendarEvent(14, "Cumpleaños Mamá", "Todo el día", "Comprar regalo y llamar por la tarde."),
         CalendarEvent(28, "Límite de borrado", "23:59", "Si no lo soluciono para hoy, perderé todos mis datos.")
     )
 
     val daysOfWeek = listOf("L", "M", "X", "J", "V", "S", "D")
 
-    // Suponemos que el mes empieza en viernes para que los días cuadren visualmente en una cuadrícula
-    val emptyDaysBeforeStart = 4
-    val totalDaysInMonth = 31
+    val emptyDaysBeforeStart = 2
+    val totalDaysInMonth = 30
 
     Column(
         modifier = Modifier
@@ -50,7 +50,7 @@ fun CalendarScreen(onBack: () -> Unit) {
             .background(Color(0xFF121212))
     ) {
         TopAppBar(
-            title = { Text("Mayo 2026", color = Color.White, fontWeight = FontWeight.Bold) },
+            title = { Text("Abril 2026", color = Color.White, fontWeight = FontWeight.Bold) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
@@ -119,7 +119,7 @@ fun CalendarScreen(onBack: () -> Unit) {
             }
         }
 
-        Divider(color = Color.DarkGray, thickness = 1.dp)
+        HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
 
         val selectedEvents = events.filter { it.day == selectedDay }
 
