@@ -1,6 +1,7 @@
 package com.example.cocky_camel_room404_fe
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -91,6 +92,12 @@ fun FakeOSScreen(
     val context = LocalContext.current
     var isGlitching by remember { mutableStateOf(false) }
 
+    var isNavigating by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = true) {
+        Toast.makeText(context, "Usa el botón EXIT para salir del sistema", Toast.LENGTH_SHORT).show()
+    }
+
     LaunchedEffect(Unit) {
         while (true) {
             delay(Random.nextLong(5000, 15000))
@@ -159,10 +166,13 @@ fun FakeOSScreen(
             ) {
                 items(desktopApps) { app ->
                     AppIcon(app = app) {
-                        if (app.isFunctional) {
-                            onAppOpened(app.name)
-                        } else {
-                            Toast.makeText(context, "${app.name} no responde...", Toast.LENGTH_SHORT).show()
+                        if (!isNavigating) {
+                            if (app.isFunctional) {
+                                isNavigating = true
+                                onAppOpened(app.name)
+                            } else {
+                                Toast.makeText(context, "${app.name} no responde...", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }
@@ -177,10 +187,13 @@ fun FakeOSScreen(
             ) {
                 dockApps.forEach { app ->
                     AppIcon(app = app, showLabel = false) {
-                        if (app.isFunctional) {
-                            onAppOpened(app.name)
-                        } else {
-                            Toast.makeText(context, "Error al abrir ${app.name}", Toast.LENGTH_SHORT).show()
+                        if (!isNavigating) {
+                            if (app.isFunctional) {
+                                isNavigating = true
+                                onAppOpened(app.name)
+                            } else {
+                                Toast.makeText(context, "Error al abrir ${app.name}", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }
