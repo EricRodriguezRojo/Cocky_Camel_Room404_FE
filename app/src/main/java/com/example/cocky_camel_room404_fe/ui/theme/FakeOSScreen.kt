@@ -92,8 +92,6 @@ fun FakeOSScreen(
     val context = LocalContext.current
     var isGlitching by remember { mutableStateOf(false) }
 
-    var isNavigating by remember { mutableStateOf(false) }
-
     BackHandler(enabled = true) {
         Toast.makeText(context, "Usa el botón EXIT para salir del sistema", Toast.LENGTH_SHORT).show()
     }
@@ -166,13 +164,10 @@ fun FakeOSScreen(
             ) {
                 items(desktopApps) { app ->
                     AppIcon(app = app) {
-                        if (!isNavigating) {
-                            if (app.isFunctional) {
-                                isNavigating = true
-                                onAppOpened(app.name)
-                            } else {
-                                Toast.makeText(context, "${app.name} no responde...", Toast.LENGTH_SHORT).show()
-                            }
+                        if (app.isFunctional) {
+                            onAppOpened(app.name)
+                        } else {
+                            Toast.makeText(context, "${app.name} no responde...", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -187,13 +182,10 @@ fun FakeOSScreen(
             ) {
                 dockApps.forEach { app ->
                     AppIcon(app = app, showLabel = false) {
-                        if (!isNavigating) {
-                            if (app.isFunctional) {
-                                isNavigating = true
-                                onAppOpened(app.name)
-                            } else {
-                                Toast.makeText(context, "Error al abrir ${app.name}", Toast.LENGTH_SHORT).show()
-                            }
+                        if (app.isFunctional) {
+                            onAppOpened(app.name)
+                        } else {
+                            Toast.makeText(context, "Error al abrir ${app.name}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
