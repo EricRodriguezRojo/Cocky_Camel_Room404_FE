@@ -14,6 +14,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -60,33 +61,35 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable("ranking") { RankingScreen(onBack = { navController.popBackStack() }) }
+                        composable("ranking") { RankingScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
 
                         composable("fake_os") {
                             FakeOSScreen(onAppOpened = { appName ->
-                                when (appName) {
-                                    "Archivos" -> { appToUnlock = "Archivos"; requiredPin = "0024"; navController.navigate("lock_screen") }
-                                    "Galería" -> {
-                                        if (isGalleryPatched) navController.navigate("gallery")
-                                        else Toast.makeText(context, "ERROR: App corrupta. Reinstale vía APK.", Toast.LENGTH_LONG).show()
+                                if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                                    when (appName) {
+                                        "Archivos" -> { appToUnlock = "Archivos"; requiredPin = "0024"; navController.navigate("lock_screen") { launchSingleTop = true } }
+                                        "Galería" -> {
+                                            if (isGalleryPatched) navController.navigate("gallery") { launchSingleTop = true }
+                                            else Toast.makeText(context, "ERROR: App corrupta. Reinstale vía APK.", Toast.LENGTH_LONG).show()
+                                        }
+                                        "Sudoku" -> navController.navigate("sudoku") { launchSingleTop = true }
+                                        "Mensajes" -> navController.navigate("messages") { launchSingleTop = true }
+                                        "Notas" -> navController.navigate("notes") { launchSingleTop = true }
+                                        "Calculadora" -> navController.navigate("calculator") { launchSingleTop = true }
+                                        "Calendario" -> navController.navigate("calendar") { launchSingleTop = true }
+                                        "Reloj" -> navController.navigate("clock") { launchSingleTop = true }
+                                        "Música" -> navController.navigate("music") { launchSingleTop = true }
+                                        "Tiempo" -> navController.navigate("weather") { launchSingleTop = true }
+                                        "Maps" -> navController.navigate("maps") { launchSingleTop = true }
+                                        "Teléfono" -> navController.navigate("phone") { launchSingleTop = true }
+                                        "Cámara" -> navController.navigate("camera") { launchSingleTop = true }
+                                        "Internet" -> navController.navigate("internet") { launchSingleTop = true }
+                                        "Play Store" -> navController.navigate("play_store") { launchSingleTop = true }
+                                        "Correo" -> { appToUnlock = "Correo"; requiredPin = "7429"; navController.navigate("lock_screen") { launchSingleTop = true } }
+                                        "System Update" -> { appToUnlock = "System Update"; requiredPin = "0404"; navController.navigate("lock_screen") { launchSingleTop = true } }
+                                        "EXIT" -> navController.navigate("main_menu") { popUpTo("fake_os") { inclusive = true } }
+                                        else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
                                     }
-                                    "Sudoku" -> navController.navigate("sudoku")
-                                    "Mensajes" -> navController.navigate("messages")
-                                    "Notas" -> navController.navigate("notes")
-                                    "Calculadora" -> navController.navigate("calculator")
-                                    "Calendario" -> navController.navigate("calendar")
-                                    "Reloj" -> navController.navigate("clock")
-                                    "Música" -> navController.navigate("music")
-                                    "Tiempo" -> navController.navigate("weather")
-                                    "Maps" -> navController.navigate("maps")
-                                    "Teléfono" -> navController.navigate("phone")
-                                    "Cámara" -> navController.navigate("camera")
-                                    "Internet" -> navController.navigate("internet")
-                                    "Play Store" -> navController.navigate("play_store")
-                                    "Correo" -> { appToUnlock = "Correo"; requiredPin = "7429"; navController.navigate("lock_screen") }
-                                    "System Update" -> { appToUnlock = "System Update"; requiredPin = "0404"; navController.navigate("lock_screen") }
-                                    "EXIT" -> navController.navigate("main_menu")
-                                    else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
                                 }
                             })
                         }
@@ -120,28 +123,28 @@ class MainActivity : ComponentActivity() {
                                         else -> navController.navigate("system_update") { popUpTo("fake_os") }
                                     }
                                 },
-                                onBack = { navController.popBackStack() }
+                                onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }
                             )
                         }
 
-                        composable("files") { FilesScreen(onBack = { navController.popBackStack() }, onPatchInstalled = { isGalleryPatched = true }) }
-                        composable("sudoku") { SudokuScreen(onBack = { navController.popBackStack() }) }
-                        composable("gallery") { GalleryScreen(onBack = { navController.popBackStack() }) }
-                        composable("mail") { MailScreen(onBack = { navController.popBackStack() }) }
-                        composable("admin_mail") { AdminMailScreen(onBack = { navController.popBackStack() }) }
-                        composable("messages") { MessagesScreen(onBack = { navController.popBackStack() }) }
+                        composable("files") { FilesScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }, onPatchInstalled = { isGalleryPatched = true }) }
+                        composable("sudoku") { SudokuScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("gallery") { GalleryScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("mail") { MailScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("admin_mail") { AdminMailScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("messages") { MessagesScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("system_update") { SystemUpdateScreen(onFinish = { navController.navigate("main_menu") { popUpTo(0) } }) }
-                        composable("notes") { NotesScreen(onBack = { navController.popBackStack() }) }
-                        composable("calculator") { CalculatorScreen(onBack = { navController.popBackStack() }) }
-                        composable("calendar") { CalendarScreen(onBack = { navController.popBackStack() }) }
-                        composable("clock") { ClockScreen(onBack = { navController.popBackStack() }) }
-                        composable("music") { MusicScreen(onBack = { navController.popBackStack() }) }
-                        composable("weather") { WeatherScreen(onBack = { navController.popBackStack() }) }
-                        composable("maps") { MapsScreen(onBack = { navController.popBackStack() }) }
-                        composable("phone") { PhoneScreen(onBack = { navController.popBackStack() }) }
-                        composable("camera") { CameraScreen(onBack = { navController.popBackStack() }) }
-                        composable("internet") { InternetScreen(onBack = { navController.popBackStack() }) }
-                        composable("play_store") { PlayStoreScreen(onBack = { navController.popBackStack() }) }
+                        composable("notes") { NotesScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("calculator") { CalculatorScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("calendar") { CalendarScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("clock") { ClockScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("music") { MusicScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("weather") { WeatherScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("maps") { MapsScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("phone") { PhoneScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("camera") { CameraScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("internet") { InternetScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("play_store") { PlayStoreScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                     }
                 }
             }
