@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Room404Theme {
-                val  navController = rememberNavController()
+                val navController = rememberNavController()
                 var appToUnlock by remember { mutableStateOf("") }
                 var requiredPin by remember { mutableStateOf("") }
                 var isGalleryPatched by remember { mutableStateOf(false) }
@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
                                                 navController.navigate("system_update") { launchSingleTop = true }
                                             } else {
                                                 appToUnlock = "System Update"
-                                                requiredPin = "0404"
+                                                requiredPin = "3728"
                                                 navController.navigate("lock_screen") { launchSingleTop = true }
                                             }
                                         }
