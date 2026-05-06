@@ -16,7 +16,8 @@ import retrofit2.http.Path
 data class LoginResponse(
     val token: String?,
     val message: String,
-    val role: String? = "User"
+    val role: String? = "User",
+    val nickname: String? = "User"
 )
 
 data class User(

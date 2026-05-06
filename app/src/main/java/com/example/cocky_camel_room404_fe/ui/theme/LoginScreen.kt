@@ -158,6 +158,8 @@ fun LoginScreen(
                                                 }
                                                 val userRole = loginData?.role ?: "User"
                                                 SessionManager.saveRole(context, userRole)
+                                                val userNickname = loginData?.nickname ?: "User"
+                                                SessionManager.saveNickname(context, userNickname)
 
                                                 Toast.makeText(context, loginData?.message ?: "Conectado", Toast.LENGTH_SHORT).show()
                                                 onLoginSuccess()
