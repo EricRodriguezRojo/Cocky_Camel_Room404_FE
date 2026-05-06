@@ -7,6 +7,7 @@ object SessionManager {
     private const val PREFS_NAME = "room404_prefs"
     private const val KEY_TOKEN = "jwt_token"
     private const val KEY_ROLE = "user_role"
+    private const val KEY_UNLOCKED_APPS = "unlocked_apps_"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -26,6 +27,26 @@ object SessionManager {
 
     fun getRole(context: Context): String {
         return getPrefs(context).getString(KEY_ROLE, "User") ?: "User"
+    }
+
+    // Métodos para gestionar apps desbloqueadas
+    fun saveUnlockedApp(context: Context, appName: String) {
+        getPrefs(context).edit().putBoolean(KEY_UNLOCKED_APPS + appName, true).apply()
+    }
+
+    fun isAppUnlocked(context: Context, appName: String): Boolean {
+        return getPrefs(context).getBoolean(KEY_UNLOCKED_APPS + appName, false)
+    }
+
+    fun resetUnlockedApps(context: Context) {
+        val prefs = getPrefs(context)
+        val keys = listOf("Correo", "Archivos", "System Update")
+        prefs.edit().apply {
+            keys.forEach { key ->
+                remove(KEY_UNLOCKED_APPS + key)
+            }
+            apply()
+        }
     }
 
     fun logout(context: Context) {

@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
 
                         composable("main_menu") {
                             MainMenuScreen(
-                                onNewGame = { TimeTracker.forceReset(); TimeTracker.start(); navController.navigate("fake_os") },
+                                onNewGame = { SessionManager.resetUnlockedApps(context); TimeTracker.forceReset(); TimeTracker.start(); navController.navigate("fake_os") },
                                 onContinue = { TimeTracker.start(); navController.navigate("fake_os") },
                                 onSettings = { },
                                 onRanking = { navController.navigate("ranking") },
@@ -67,7 +67,15 @@ class MainActivity : ComponentActivity() {
                             FakeOSScreen(onAppOpened = { appName ->
                                 if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
                                     when (appName) {
-                                        "Archivos" -> { appToUnlock = "Archivos"; requiredPin = "0024"; navController.navigate("lock_screen") { launchSingleTop = true } }
+                                        "Archivos" -> {
+                                            if (SessionManager.isAppUnlocked(context, "Archivos")) {
+                                                navController.navigate("files") { launchSingleTop = true }
+                                            } else {
+                                                appToUnlock = "Archivos"
+                                                requiredPin = "0024"
+                                                navController.navigate("lock_screen") { launchSingleTop = true }
+                                            }
+                                        }
                                         "Galería" -> {
                                             if (isGalleryPatched) navController.navigate("gallery") { launchSingleTop = true }
                                             else Toast.makeText(context, "ERROR: App corrupta. Reinstale vía APK.", Toast.LENGTH_LONG).show()
@@ -85,8 +93,25 @@ class MainActivity : ComponentActivity() {
                                         "Cámara" -> navController.navigate("camera") { launchSingleTop = true }
                                         "Internet" -> navController.navigate("internet") { launchSingleTop = true }
                                         "Play Store" -> navController.navigate("play_store") { launchSingleTop = true }
-                                        "Correo" -> { appToUnlock = "Correo"; requiredPin = "7429"; navController.navigate("lock_screen") { launchSingleTop = true } }
-                                        "System Update" -> { appToUnlock = "System Update"; requiredPin = "0404"; navController.navigate("lock_screen") { launchSingleTop = true } }
+                                        "Correo" -> {
+                                            if (SessionManager.isAppUnlocked(context, "Correo")) {
+                                                if (SessionManager.getRole(context) == "Admin") navController.navigate("admin_mail") { launchSingleTop = true }
+                                                else navController.navigate("mail") { launchSingleTop = true }
+                                            } else {
+                                                appToUnlock = "Correo"
+                                                requiredPin = "7429"
+                                                navController.navigate("lock_screen") { launchSingleTop = true }
+                                            }
+                                        }
+                                        "System Update" -> {
+                                            if (SessionManager.isAppUnlocked(context, "System Update")) {
+                                                navController.navigate("system_update") { launchSingleTop = true }
+                                            } else {
+                                                appToUnlock = "System Update"
+                                                requiredPin = "0404"
+                                                navController.navigate("lock_screen") { launchSingleTop = true }
+                                            }
+                                        }
                                         "EXIT" -> navController.navigate("main_menu") { popUpTo("fake_os") { inclusive = true } }
                                         else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
                                     }
@@ -123,7 +148,8 @@ class MainActivity : ComponentActivity() {
                                         else -> navController.navigate("system_update") { popUpTo("fake_os") }
                                     }
                                 },
-                                onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }
+                                onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() },
+                                context = context
                             )
                         }
 
