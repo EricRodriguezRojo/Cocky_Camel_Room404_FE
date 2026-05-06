@@ -48,8 +48,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -91,6 +93,7 @@ fun FakeOSScreen(
 ) {
     val context = LocalContext.current
     var isGlitching by remember { mutableStateOf(false) }
+    var showExitConfirm by remember { mutableStateOf(false) }
 
     BackHandler(enabled = true) {
         Toast.makeText(context, "Usa el botón EXIT para salir del sistema", Toast.LENGTH_SHORT).show()
@@ -130,6 +133,26 @@ fun FakeOSScreen(
         FakeApp("Cámara", Icons.Filled.CameraAlt, Color(0xFF333333), true)
     )
 
+    if (showExitConfirm) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirm = false },
+            title = { Text("¿Seguro que quieres abandonar la partida?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExitConfirm = false
+                    onAppOpened("EXIT")
+                }) {
+                    Text("Confirmar", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitConfirm = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -164,7 +187,9 @@ fun FakeOSScreen(
             ) {
                 items(desktopApps) { app ->
                     AppIcon(app = app) {
-                        if (app.isFunctional) {
+                        if (app.name == "EXIT") {
+                            showExitConfirm = true
+                        } else if (app.isFunctional) {
                             onAppOpened(app.name)
                         } else {
                             Toast.makeText(context, "${app.name} no responde...", Toast.LENGTH_SHORT).show()
