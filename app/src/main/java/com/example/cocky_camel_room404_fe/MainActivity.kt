@@ -53,12 +53,25 @@ class MainActivity : ComponentActivity() {
 
                         composable("main_menu") {
                             MainMenuScreen(
-                                onNewGame = { SessionManager.resetUnlockedApps(context); TimeTracker.forceReset(); TimeTracker.start(); navController.navigate("fake_os") },
+                                onNewGame = { 
+                                    SessionManager.resetUnlockedApps(context)
+                                    TimeTracker.forceReset()
+                                    navController.navigate("system_intro") 
+                                },
                                 onContinue = { TimeTracker.start(); navController.navigate("fake_os") },
                                 onSettings = { },
                                 onRanking = { navController.navigate("ranking") },
                                 onLogout = { SessionManager.logout(context); navController.navigate("login") { popUpTo(0) { inclusive = true } } }
                             )
+                        }
+
+                        composable("system_intro") {
+                            SystemIntroScreen(onFinished = {
+                                TimeTracker.start()
+                                navController.navigate("fake_os") {
+                                    popUpTo("system_intro") { inclusive = true }
+                                }
+                            })
                         }
 
                         composable("ranking") { RankingScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
