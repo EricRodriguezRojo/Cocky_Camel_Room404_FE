@@ -26,16 +26,16 @@ object SessionManager {
         getPrefs(context).edit().putString(KEY_ROLE, role).apply()
     }
 
-    fun getRole(context: Context): String {
-        return getPrefs(context).getString(KEY_ROLE, "User") ?: "User"
-    }
-
     fun saveNickname(context: Context, nickname: String) {
         getPrefs(context).edit().putString(KEY_NICKNAME, nickname).apply()
     }
 
-    fun getNickname(context: Context): String {
-        return getPrefs(context).getString(KEY_NICKNAME, "User") ?: "User"
+    fun getNickname(context: Context): String? {
+        return getPrefs(context).getString(KEY_NICKNAME, null)
+    }
+
+    fun getRole(context: Context): String {
+        return getPrefs(context).getString(KEY_ROLE, "User") ?: "User"
     }
 
     // Metodos para gestionar apps desbloqueadas

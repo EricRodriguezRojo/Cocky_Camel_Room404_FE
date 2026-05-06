@@ -72,6 +72,18 @@ fun LoginScreen(
                             val userRole = loginData?.role ?: "User"
                             SessionManager.saveRole(context, userRole)
 
+                                            // Intentamos obtener el nickname por email (si está disponible)
+                                            try {
+                                                val email = account.email
+                                                if (!email.isNullOrBlank()) {
+                                                    val userResp = RetrofitClient.instance.getUser(email)
+                                                    if (userResp.isSuccessful) {
+                                                        val user = userResp.body()
+                                                        user?.nickname?.let { SessionManager.saveNickname(context, it) }
+                                                    }
+                                                }
+                                            } catch (e: Exception) {}
+
                             Toast.makeText(context, loginData?.message ?: "Acceso concedido", Toast.LENGTH_SHORT).show()
                             onLoginSuccess()
                         } else {
@@ -158,8 +170,15 @@ fun LoginScreen(
                                                 }
                                                 val userRole = loginData?.role ?: "User"
                                                 SessionManager.saveRole(context, userRole)
-                                                val userNickname = loginData?.nickname ?: "User"
-                                                SessionManager.saveNickname(context, userNickname)
+
+                                                // Obtener nickname desde backend y guardarlo
+                                                try {
+                                                    val userResp = RetrofitClient.instance.getUser(username)
+                                                    if (userResp.isSuccessful) {
+                                                        val user = userResp.body()
+                                                        user?.nickname?.let { SessionManager.saveNickname(context, it) }
+                                                    }
+                                                } catch (e: Exception) {}
 
                                                 Toast.makeText(context, loginData?.message ?: "Conectado", Toast.LENGTH_SHORT).show()
                                                 onLoginSuccess()

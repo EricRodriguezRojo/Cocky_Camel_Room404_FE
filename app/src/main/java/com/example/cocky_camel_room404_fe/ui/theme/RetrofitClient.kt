@@ -16,8 +16,7 @@ import retrofit2.http.Path
 data class LoginResponse(
     val token: String?,
     val message: String,
-    val role: String? = "User",
-    val nickname: String? = "User"
+    val role: String? = "User"
 )
 
 data class User(
@@ -52,6 +51,9 @@ interface Room404Api {
 
     @POST("api/user/google-login")
     suspend fun googleLogin(@Body data: Map<String, String>): Response<LoginResponse>
+
+    @GET("api/user/{email}")
+    suspend fun getUser(@Path("email") email: String): Response<User>
 
     @POST("api/game/trigger-malware")
     suspend fun triggerMalware(

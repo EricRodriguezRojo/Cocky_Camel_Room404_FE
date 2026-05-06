@@ -51,17 +51,6 @@ fun MainMenuScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                val nickname = SessionManager.getNickname(context)
-                
-                Text(
-                    text = "¡Bienvenido $nickname!",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Light,
-                    letterSpacing = 2.sp,
-                    color = Color.White.copy(alpha = 0.8f),
-                    modifier = Modifier.padding(bottom = 48.dp)
-                )
-
                 Text(
                     text = "ROOM 404",
                     fontSize = 32.sp,
