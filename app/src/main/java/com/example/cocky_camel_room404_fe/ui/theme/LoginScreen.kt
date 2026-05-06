@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -148,7 +149,6 @@ fun LoginScreen(
                                     coroutineScope.launch {
                                         isLoading = true
                                         try {
-                                            // LÍNEA CORREGIDA
                                             val response = RetrofitClient.instance.login(username, password)
 
                                             if (response.isSuccessful) {
@@ -181,25 +181,36 @@ fun LoginScreen(
                                 onClick = {
                                     googleLauncher.launch(googleSignInClient.signInIntent)
                                 },
-                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
                                 shape = MaterialTheme.shapes.extraSmall,
                                 border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.3f))
                             ) {
                                 Text("CONTINUE WITH GOOGLE", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                             }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            OutlinedButton(
+                                onClick = onNavigateToRegister,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                shape = MaterialTheme.shapes.extraSmall,
+                                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.3f)
+                                )
+                            ) {
+                                Text(
+                                    "CREATE NEW CREDENTIALS",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.sp
+                                )
+                            }
                         }
                     }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                TextButton(onClick = onNavigateToRegister) {
-                    Text(
-                        "CREATE NEW CREDENTIALS",
-                        color = Color.White.copy(alpha = 0.5f),
-                        fontSize = 12.sp,
-                        letterSpacing = 1.sp
-                    )
                 }
             }
         }
