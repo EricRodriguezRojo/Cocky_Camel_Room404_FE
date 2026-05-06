@@ -1,5 +1,9 @@
 package com.example.cocky_camel_room404_fe
 
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.content.Context
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -39,6 +42,8 @@ fun LockScreen(
     var enteredPin by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
+    val vibrator = remember { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
 
     val pinDotColor by animateColorAsState(
         targetValue = if (isError) Color(0xFFCF6679) else MaterialTheme.colorScheme.primary,
@@ -148,13 +153,20 @@ fun LockScreen(
                                                     if (enteredPin.length < 4 && !isError) {
                                                         enteredPin += key
 
-                                                        // COMPROBACIÓN INSTANTÁNEA AQUÍ
                                                         if (enteredPin.length == 4) {
                                                             if (enteredPin == correctPin) {
                                                                 SessionManager.saveUnlockedApp(context, appName)
-                                                                onSuccess() // Entra de golpe
+                                                                onSuccess()
                                                             } else {
                                                                 isError = true
+
+                                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                                    vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+                                                                } else {
+                                                                    @Suppress("DEPRECATION")
+                                                                    vibrator.vibrate(400)
+                                                                }
+
                                                                 coroutineScope.launch {
                                                                     delay(400)
                                                                     enteredPin = ""

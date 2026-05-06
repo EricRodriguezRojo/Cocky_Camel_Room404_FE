@@ -8,12 +8,17 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
+import android.os.BatteryManager
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -31,6 +36,7 @@ import kotlin.math.sqrt
 @Composable
 fun SystemUpdateScreen(onFinish: () -> Unit) {
     val context = LocalContext.current
+
     var gameStep by remember { mutableStateOf(0) }
     var flashWhite by remember { mutableStateOf(false) }
 
@@ -49,7 +55,8 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
         targetValue = when {
             flashWhite -> Color.White
             gameStep == 0 -> Color(0xFF330000)
-            gameStep == 1 -> Color.Black
+            gameStep == 1 -> Color(0xFF883300)
+            gameStep == 2 -> Color.Black
             else -> Color(0xFF003300)
         },
         label = ""
@@ -58,6 +65,7 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
     DisposableEffect(Unit) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         val sensorListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
@@ -67,7 +75,14 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
                     val z = event.values[2]
 
                     val acceleration = sqrt((x * x + y * y + z * z).toDouble()) - SensorManager.GRAVITY_EARTH
+
                     if (acceleration > 12) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE))
+                        } else {
+                            @Suppress("DEPRECATION")
+                            vibrator.vibrate(1000)
+                        }
                         gameStep = 1
                     }
                 }
@@ -93,15 +108,33 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
     }
 
     LaunchedEffect(gameStep) {
+        if (gameStep == 1) {
+            val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
+                context.registerReceiver(null, ifilter)
+            }
+            val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+            val isCharging: Boolean = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+
+            if (isCharging) {
+                delay(2000)
+                gameStep = 2
+            }
+        }
+    }
+
+    LaunchedEffect(gameStep) {
         if (gameStep == 2) {
+            delay(4000)
+            gameStep = 3
+        } else if (gameStep == 3) {
             flashWhite = true
-            delay(150)
+            delay(100)
             flashWhite = false
-            delay(150)
+            delay(100)
             flashWhite = true
             delay(500)
             flashWhite = false
-            delay(4000)
+            delay(3500)
             onFinish()
         }
     }
@@ -143,39 +176,67 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
             }
             1 -> {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Filled.Warning,
+                        contentDescription = null,
+                        tint = Color(0xFFFF9800).copy(alpha = alphaAnim),
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "ENERGY INSUFFICIENT\nFOR CORE DELETION",
-                        color = Color.Red,
+                        text = "LOW BATTERY DETECTED\nUPDATE ABORTED",
+                        color = Color(0xFFFF9800),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 2.sp
                     )
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(48.dp))
                     Text(
                         text = "CONNECT POWER SOURCE\nIMMEDIATELY",
                         color = Color.White.copy(alpha = alphaAnim),
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 2.sp
                     )
                 }
             }
             2 -> {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(
+                        color = Color.Green,
+                        modifier = Modifier.size(60.dp),
+                        strokeWidth = 6.dp
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Text(
+                        text = "SYSTEM UPDATING...\nPURGING MALWARE",
+                        color = Color.Green.copy(alpha = alphaAnim),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 2.sp
+                    )
+                }
+            }
+            3 -> {
                 if (!flashWhite) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "VIRUS DELETED",
+                            text = "SYSTEM UPDATED",
                             color = Color.Green,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            letterSpacing = 2.sp
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "YOU ESCAPED ROOM 404",
+                            text = "MALWARE DELETED.\nYOU ESCAPED ROOM 404.",
                             color = Color.White,
                             fontSize = 16.sp,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            letterSpacing = 1.sp
                         )
                     }
                 }
