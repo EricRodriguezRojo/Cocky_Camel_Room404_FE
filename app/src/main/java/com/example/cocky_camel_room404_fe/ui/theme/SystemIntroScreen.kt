@@ -13,14 +13,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 
 data class TerminalLine(val text: String, val color: Color)
 
 @Composable
 fun SystemIntroScreen(onFinished: () -> Unit) {
+    val context = LocalContext.current
+    val nickname = SessionManager.getNickname(context) ?: "ANÓNIMO"
+
     val lines = remember {
         listOf(
+            TerminalLine("BIENVENIDO, $nickname", Color.Yellow),
             TerminalLine("BOOTING SAFE_MODE...", Color.Green),
             TerminalLine("ERROR: BOOT SECTOR CORRUPTED.", Color.Red),
             TerminalLine("MALWARE DETECTADO: Room404_Architect.exe", Color.Red),

@@ -52,6 +52,9 @@ interface Room404Api {
     @POST("api/user/google-login")
     suspend fun googleLogin(@Body data: Map<String, String>): Response<LoginResponse>
 
+    @GET("api/user/{email}")
+    suspend fun getUser(@Path("email") email: String): Response<User>
+
     @POST("api/game/trigger-malware")
     suspend fun triggerMalware(
         @Header("Authorization") token: String

@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Room404Theme {
-                val navController = rememberNavController()
+                val  navController = rememberNavController()
                 var appToUnlock by remember { mutableStateOf("") }
                 var requiredPin by remember { mutableStateOf("") }
                 var isGalleryPatched by remember { mutableStateOf(false) }
