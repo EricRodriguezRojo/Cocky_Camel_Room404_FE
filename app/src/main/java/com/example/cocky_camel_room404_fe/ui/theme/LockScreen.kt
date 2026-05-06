@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Context
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -32,7 +33,8 @@ fun LockScreen(
     appName: String,
     correctPin: String,
     onSuccess: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    context: Context
 ) {
     var enteredPin by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
@@ -149,6 +151,7 @@ fun LockScreen(
                                                         // COMPROBACIÓN INSTANTÁNEA AQUÍ
                                                         if (enteredPin.length == 4) {
                                                             if (enteredPin == correctPin) {
+                                                                SessionManager.saveUnlockedApp(context, appName)
                                                                 onSuccess() // Entra de golpe
                                                             } else {
                                                                 isError = true
