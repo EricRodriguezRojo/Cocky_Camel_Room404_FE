@@ -185,12 +185,36 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
 
+                        composable("system_update") {
+                            SystemUpdateScreen(
+                                onSaveProgress = { puzzleName, timeSeconds ->
+                                    scope.launch {
+                                        try {
+                                            val token = SessionManager.getToken(context)
+                                            if (token != null) {
+                                                RetrofitClient.instance.completePuzzle(
+                                                    token = "Bearer $token",
+                                                    puzzleName = puzzleName,
+                                                    body = mapOf("timeSeconds" to timeSeconds)
+                                                )
+                                            }
+                                        } catch (e: Exception) {
+                                        }
+                                    }
+                                },
+                                onFinish = {
+                                    navController.navigate("main_menu") {
+                                        popUpTo(0)
+                                    }
+                                }
+                            )
+                        }
+
                         composable("sudoku") { SudokuScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("gallery") { GalleryScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("mail") { MailScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("admin_mail") { AdminMailScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("messages") { MessagesScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
-                        composable("system_update") { SystemUpdateScreen(onFinish = { navController.navigate("main_menu") { popUpTo(0) } }) }
                         composable("notes") { NotesScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("calculator") { CalculatorScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("calendar") { CalendarScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }

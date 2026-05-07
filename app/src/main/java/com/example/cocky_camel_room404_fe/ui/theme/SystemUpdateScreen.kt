@@ -35,11 +35,17 @@ import kotlinx.coroutines.delay
 import kotlin.math.sqrt
 
 @Composable
-fun SystemUpdateScreen(onFinish: () -> Unit) {
+fun SystemUpdateScreen(
+    onSaveProgress: (String, Int) -> Unit,
+    onFinish: () -> Unit
+) {
     val context = LocalContext.current
 
     var gameStep by remember { mutableStateOf(0) }
     var flashWhite by remember { mutableStateOf(false) }
+
+    var shakeStartTime by remember { mutableLongStateOf(0L) }
+    var chargeStartTime by remember { mutableLongStateOf(0L) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "")
     val alphaAnim by infiniteTransition.animateFloat(
@@ -63,6 +69,10 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
         label = ""
     )
 
+    LaunchedEffect(Unit) {
+        shakeStartTime = System.currentTimeMillis()
+    }
+
     DisposableEffect(Unit) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -78,6 +88,11 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
                     val acceleration = sqrt((x * x + y * y + z * z).toDouble()) - SensorManager.GRAVITY_EARTH
 
                     if (acceleration > 12) {
+                        val timeTaken = (System.currentTimeMillis() - shakeStartTime) / 1000
+                        onSaveProgress("SHAKE_SYSTEM", timeTaken.toInt())
+
+                        chargeStartTime = System.currentTimeMillis()
+
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE))
                         } else {
@@ -94,6 +109,8 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
         val powerReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == Intent.ACTION_POWER_CONNECTED && gameStep == 1) {
+                    val timeTaken = (System.currentTimeMillis() - chargeStartTime) / 1000
+                    onSaveProgress("CHARGER_SYSTEM", timeTaken.toInt())
                     gameStep = 2
                 }
             }
@@ -118,6 +135,8 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
 
             if (isCharging) {
                 delay(2000)
+                val timeTaken = (System.currentTimeMillis() - chargeStartTime) / 1000
+                onSaveProgress("CHARGER_SYSTEM", timeTaken.toInt())
                 gameStep = 2
             }
         }
