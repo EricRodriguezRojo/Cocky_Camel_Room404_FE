@@ -267,7 +267,7 @@
     <string name="ranking_global_leaderboard">CLASIFICACIÓN GLOBAL</string>
     <string name="ranking_column_user">USUARIO</string>
     <string name="ranking_column_pts">PTS</string>
-    <string name="ranking_column_time">TIEMPO</string>
+    <string name="ranking_column_time">SEG.</string>
     <string name="ranking_anon">Anónimo</string>
     <string name="system_update_insufficient">Batería insuficiente para iniciar la actualización.</string>
     <string name="system_update_connect_power">Conecta el dispositivo a una fuente de alimentación para continuar.</string>
