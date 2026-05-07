@@ -70,6 +70,9 @@ fun SystemIntroScreen(onFinished: () -> Unit) {
         }
         currentIndex = lines.size
         sequenceFinished = true
+
+        SessionManager.setIntroSeen(context, true)
+
         delay(1500)
         onFinished()
     }

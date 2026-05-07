@@ -10,6 +10,9 @@ object SessionManager {
     private const val KEY_NICKNAME = "user_nickname"
     private const val KEY_UNLOCKED_APPS = "unlocked_apps_"
 
+    private const val KEY_GALLERY_PATCHED = "gallery_patched"
+    private const val KEY_INTRO_SEEN = "intro_seen"
+
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
@@ -38,13 +41,28 @@ object SessionManager {
         return getPrefs(context).getString(KEY_ROLE, "User") ?: "User"
     }
 
-    // Metodos para gestionar apps desbloqueadas
     fun saveUnlockedApp(context: Context, appName: String) {
         getPrefs(context).edit().putBoolean(KEY_UNLOCKED_APPS + appName, true).apply()
     }
 
     fun isAppUnlocked(context: Context, appName: String): Boolean {
         return getPrefs(context).getBoolean(KEY_UNLOCKED_APPS + appName, false)
+    }
+
+    fun saveGalleryPatched(context: Context, isPatched: Boolean) {
+        getPrefs(context).edit().putBoolean(KEY_GALLERY_PATCHED, isPatched).apply()
+    }
+
+    fun isGalleryPatched(context: Context): Boolean {
+        return getPrefs(context).getBoolean(KEY_GALLERY_PATCHED, false)
+    }
+
+    fun setIntroSeen(context: Context, seen: Boolean) {
+        getPrefs(context).edit().putBoolean(KEY_INTRO_SEEN, seen).apply()
+    }
+
+    fun isIntroSeen(context: Context): Boolean {
+        return getPrefs(context).getBoolean(KEY_INTRO_SEEN, false)
     }
 
     fun resetUnlockedApps(context: Context) {
@@ -54,6 +72,8 @@ object SessionManager {
             keys.forEach { key ->
                 remove(KEY_UNLOCKED_APPS + key)
             }
+            remove(KEY_GALLERY_PATCHED)
+            remove(KEY_INTRO_SEEN)
             apply()
         }
     }
