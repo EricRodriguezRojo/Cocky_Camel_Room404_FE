@@ -2,7 +2,7 @@ package com.example.cocky_camel_room404_fe
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cocky_camel_room404_fe.ui.theme.Room404Theme
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -34,12 +34,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Room404Theme {
+                val context = LocalContext.current
+
                 val navController = rememberNavController()
                 var appToUnlock by remember { mutableStateOf("") }
                 var requiredPin by remember { mutableStateOf("") }
-                var isGalleryPatched by remember { mutableStateOf(false) }
 
-                val context = LocalContext.current
+                var isGalleryPatched by remember { mutableStateOf(SessionManager.isGalleryPatched(context)) }
+
                 val scope = rememberCoroutineScope()
 
                 val startDestination = remember {
@@ -53,13 +55,20 @@ class MainActivity : ComponentActivity() {
 
                         composable("main_menu") {
                             MainMenuScreen(
-                                onNewGame = { 
+                                onNewGame = {
                                     SessionManager.resetUnlockedApps(context)
                                     TimeTracker.forceReset()
-                                    navController.navigate("system_intro") 
+                                    navController.navigate("system_intro")
                                 },
-                                onContinue = { TimeTracker.start(); navController.navigate("fake_os") },
-                                onSettings = { },
+                                onContinue = {
+                                    TimeTracker.start()
+                                    if (SessionManager.isIntroSeen(context)) {
+                                        navController.navigate("fake_os")
+                                    } else {
+                                        navController.navigate("system_intro")
+                                    }
+                                },
+                                onSettings = { navController.navigate("settings") },
                                 onRanking = { navController.navigate("ranking") },
                                 onLogout = { SessionManager.logout(context); navController.navigate("login") { popUpTo(0) { inclusive = true } } }
                             )
@@ -166,7 +175,16 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable("files") { FilesScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }, onPatchInstalled = { isGalleryPatched = true }) }
+                        composable("files") {
+                            FilesScreen(
+                                onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() },
+                                onPatchInstalled = {
+                                    isGalleryPatched = true
+                                    SessionManager.saveGalleryPatched(context, true)
+                                }
+                            )
+                        }
+
                         composable("sudoku") { SudokuScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("gallery") { GalleryScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("mail") { MailScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
@@ -184,6 +202,7 @@ class MainActivity : ComponentActivity() {
                         composable("camera") { CameraScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("internet") { InternetScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("play_store") { PlayStoreScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
+                        composable("settings") { SettingsScreen(onBack = { navController.popBackStack() }) }
                     }
                 }
             }

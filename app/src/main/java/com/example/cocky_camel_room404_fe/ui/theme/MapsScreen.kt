@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
@@ -56,6 +57,9 @@ fun MapsScreen(onBack: () -> Unit) {
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
     var hasCenteredCamera by remember { mutableStateOf(false) }
     var errorModeActive by remember { mutableStateOf(false) }
+
+    val userLocationLabel = stringResource(R.string.maps_user_location)
+    val routeErrorMsg = stringResource(R.string.maps_route_error)
 
     LaunchedEffect(Unit) {
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", 0))
@@ -136,7 +140,7 @@ fun MapsScreen(onBack: () -> Unit) {
                     val marker = Marker(mapView).apply {
                         id = "user_location_marker"
                         position = userPoint
-                        title = "Tu ubicación"
+                        title = userLocationLabel
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     }
                     mapView.overlays.add(marker)
@@ -177,12 +181,16 @@ fun MapsScreen(onBack: () -> Unit) {
             ) {
                 Icon(
                     Icons.Default.ArrowBack,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.back),
                     tint = Color.White,
                     modifier = Modifier.clickable { onBack() }
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                Text("Buscar en Google Maps", color = Color(0xFFD0D0D0), modifier = Modifier.weight(1f))
+                Text(
+                    text = stringResource(R.string.maps_search_placeholder),
+                    color = Color(0xFFD0D0D0),
+                    modifier = Modifier.weight(1f)
+                )
                 Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White)
             }
         }
@@ -195,7 +203,7 @@ fun MapsScreen(onBack: () -> Unit) {
                     .padding(16.dp)
             ) {
                 Text(
-                    "Activa el permiso de ubicación para centrar el mapa en tu posición.",
+                    text = stringResource(R.string.maps_permission_required),
                     color = Color.White,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                     fontSize = 12.sp
@@ -218,7 +226,7 @@ fun MapsScreen(onBack: () -> Unit) {
             containerColor = Color(0xFF2A2A2A),
             contentColor = Color(0xFF03A9F4)
         ) {
-            Icon(Icons.Default.MyLocation, contentDescription = null)
+            Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.maps_my_location))
         }
 
         Card(
@@ -229,10 +237,10 @@ fun MapsScreen(onBack: () -> Unit) {
             colors = CardDefaults.cardColors(containerColor = panelBg)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                Text("Última ubicación registrada", color = Color.Gray, fontSize = 12.sp)
+                Text(stringResource(R.string.maps_last_location_label), color = Color.Gray, fontSize = 12.sp)
                 Text(
-                    currentLocation?.let { "Lat ${"%.5f".format(it.latitude)}, Lon ${"%.5f".format(it.longitude)}" }
-                        ?: "Carrer de l'Arquitecte Muncunill",
+                    text = currentLocation?.let { "Lat ${"%.5f".format(it.latitude)}, Lon ${"%.5f".format(it.longitude)}" }
+                        ?: stringResource(R.string.maps_default_address),
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -241,14 +249,14 @@ fun MapsScreen(onBack: () -> Unit) {
                 Button(
                     onClick = {
                         errorModeActive = true
-                        Toast.makeText(context, "Error de ruta: servicio no disponible.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, routeErrorMsg, Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = directionsButtonBg)
                 ) {
                     Icon(Icons.Default.Directions, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Cómo llegar")
+                    Text(stringResource(R.string.maps_get_directions))
                 }
             }
         }

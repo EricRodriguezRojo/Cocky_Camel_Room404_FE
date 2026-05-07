@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,7 +25,6 @@ fun InternetScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Fake Browser Top Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -33,12 +33,15 @@ fun InternetScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                Icon(
+                    Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = Color.Black
+                )
             }
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Fake URL Bar
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -56,11 +59,14 @@ fun InternetScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.width(4.dp))
 
             IconButton(onClick = {  }) {
-                Icon(Icons.Filled.Refresh, contentDescription = "Refresh", tint = Color.Black)
+                Icon(
+                    Icons.Filled.Refresh,
+                    contentDescription = stringResource(R.string.refresh),
+                    tint = Color.Black
+                )
             }
         }
 
-        // Error Content
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -70,7 +76,7 @@ fun InternetScreen(onBack: () -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.Filled.WifiOff,
-                contentDescription = "No Internet",
+                contentDescription = null,
                 tint = Color.Gray,
                 modifier = Modifier.size(72.dp)
             )
@@ -78,7 +84,7 @@ fun InternetScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "No internet connection",
+                text = stringResource(R.string.no_internet_title),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF202124)
@@ -87,7 +93,7 @@ fun InternetScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Try:\n• Checking the network cables, modem, and router\n• Reconnecting to Wi-Fi",
+                text = stringResource(R.string.no_internet_desc),
                 fontSize = 15.sp,
                 color = Color(0xFF5F6368),
                 lineHeight = 24.sp
@@ -96,7 +102,7 @@ fun InternetScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "ERR_INTERNET_DISCONNECTED",
+                text = stringResource(R.string.internet_try_steps),
                 fontSize = 12.sp,
                 color = Color(0xFF5F6368),
                 fontWeight = FontWeight.Medium

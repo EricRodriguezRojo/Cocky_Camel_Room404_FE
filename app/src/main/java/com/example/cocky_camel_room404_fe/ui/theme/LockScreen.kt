@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,7 +70,7 @@ fun LockScreen(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                    Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                 }
             }
 
@@ -82,7 +83,7 @@ fun LockScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "SISTEMA BLOQUEADO",
+                    text = stringResource(R.string.system_locked_title),
                     color = if (appName == "System Update") Color(0xFFCF6679) else Color.White,
                     fontSize = 20.sp,
                     letterSpacing = 4.sp,
@@ -90,7 +91,7 @@ fun LockScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Introduce el PIN para acceder a $appName",
+                    text = stringResource(R.string.lock_enter_pin),
                     color = Color.LightGray,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center

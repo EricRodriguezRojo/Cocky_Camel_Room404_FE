@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,10 +43,10 @@ fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
-                title = { Text("Almacenamiento Interno", color = Color.White) },
+                title = { Text(stringResource(R.string.files_internal_storage), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -62,10 +63,10 @@ fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
                                         isInstalling = true
                                     }
                                     ".sys_cache" -> {
-                                        Toast.makeText(context, "ACCESO DENEGADO: Permisos de root requeridos", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.files_access_denied), Toast.LENGTH_SHORT).show()
                                     }
                                     else -> {
-                                        Toast.makeText(context, "Archivo protegido o corrupto", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.files_corrupt), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }
@@ -115,7 +116,7 @@ fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
 
                 onPatchInstalled()
                 isInstalling = false
-                Toast.makeText(context, "Galería actualizada con éxito", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.files_gallery_success), Toast.LENGTH_LONG).show()
             }
 
             Box(
@@ -130,7 +131,7 @@ fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "Instalando parche de sistema...",
+                        text = stringResource(R.string.files_installing_patch),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp

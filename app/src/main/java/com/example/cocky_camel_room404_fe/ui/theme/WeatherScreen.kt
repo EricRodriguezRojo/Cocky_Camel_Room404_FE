@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,10 +28,14 @@ fun WeatherScreen(onBack: () -> Unit) {
         modifier = Modifier.fillMaxSize().background(gradient)
     ) {
         TopAppBar(
-            title = { Text("Tiempo", color = Color.White) },
+            title = { Text(stringResource(R.string.weather_title), color = Color.White) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = Color.White
+                    )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -41,7 +46,12 @@ fun WeatherScreen(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Terrassa", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Bold)
-            Text("Cielo Corrupto", color = Color.LightGray, fontSize = 18.sp)
+
+            Text(
+                text = stringResource(R.string.weather_corrupted_sky),
+                color = Color.LightGray,
+                fontSize = 18.sp
+            )
 
             Spacer(modifier = Modifier.height(48.dp))
 
@@ -56,10 +66,14 @@ fun WeatherScreen(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("PRONÓSTICO DE ERROR", color = Color.Red, fontWeight = FontWeight.Bold)
-                    Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color.Gray)
+                    Text(
+                        text = stringResource(R.string.weather_forecast_error).uppercase(),
+                        color = Color.Red,
+                        fontWeight = FontWeight.Bold
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color.Gray)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Mañana", color = Color.White)
+                        Text(stringResource(R.string.weather_tomorrow), color = Color.White)
                         Icon(Icons.Default.WbSunny, contentDescription = null, tint = Color.Yellow)
                         Text("ERR°", color = Color.White)
                     }

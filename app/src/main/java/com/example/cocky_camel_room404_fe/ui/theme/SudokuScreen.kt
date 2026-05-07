@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,10 +68,10 @@ fun SudokuScreen(onBack: () -> Unit) {
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0D0D0D))) {
         TopAppBar(
-            title = { Text("Sudoku Pro", color = Color.White) },
+            title = { Text(stringResource(R.string.app_sudoku), color = Color.White) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -82,7 +83,7 @@ fun SudokuScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Pistas restantes: $hintsRemaining",
+                text = "${stringResource(R.string.sudoku_hints_label)} $hintsRemaining",
                 color = if (hintsRemaining > 0) Color.LightGray else Color.Red,
                 fontSize = 16.sp
             )
@@ -104,7 +105,7 @@ fun SudokuScreen(onBack: () -> Unit) {
             ) {
                 Icon(Icons.Filled.Info, null, tint = Color.White)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Pista")
+                Text(stringResource(R.string.sudoku_hint_button))
             }
         }
 
@@ -215,10 +216,22 @@ fun SudokuScreen(onBack: () -> Unit) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text(if (isSuccess) "¡Sistema Desbloqueado!" else "Error de Secuencia", color = if (isSuccess) Color(0xFF4CAF50) else Color(0xFFCF6679)) },
-            text = { Text(if (isSuccess) "Has completado el tablero correctamente." else "Hay números incorrectos. Revísalos.", color = Color.White) },
+            title = {
+                Text(
+                    text = if (isSuccess) stringResource(R.string.sudoku_success_title) else stringResource(R.string.sudoku_error_title),
+                    color = if (isSuccess) Color(0xFF4CAF50) else Color(0xFFCF6679)
+                )
+            },
+            text = {
+                Text(
+                    text = if (isSuccess) stringResource(R.string.sudoku_success_text) else stringResource(R.string.sudoku_error_text),
+                    color = Color.White
+                )
+            },
             confirmButton = {
-                Button(onClick = { showDialog = false; if (isSuccess) onBack() }) { Text("OK") }
+                Button(onClick = { showDialog = false; if (isSuccess) onBack() }) {
+                    Text(stringResource(R.string.accept))
+                }
             },
             containerColor = Color(0xFF1E1E1E)
         )

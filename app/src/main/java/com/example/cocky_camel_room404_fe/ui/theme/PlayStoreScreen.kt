@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -76,7 +77,7 @@ fun PlayStoreScreen(onBack: () -> Unit) {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Play Store",
+                            text = stringResource(R.string.app_playstore),
                             color = Color(0xFF1F1F1F),
                             fontWeight = FontWeight.SemiBold
                         )
@@ -85,7 +86,7 @@ fun PlayStoreScreen(onBack: () -> Unit) {
                         IconButton(onClick = onBack) {
                             Icon(
                                 Icons.Filled.ArrowBack,
-                                contentDescription = null,
+                                contentDescription = stringResource(R.string.back),
                                 tint = Color(0xFF1F1F1F)
                             )
                         }
@@ -115,7 +116,7 @@ fun PlayStoreScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "No tienes conexión a Internet. Asegúrate de que el Wi-Fi o los datos móviles estén activados e inténtalo de nuevo.",
+                text = stringResource(R.string.playstore_no_internet_msg),
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
                 color = secondaryText,
@@ -126,7 +127,7 @@ fun PlayStoreScreen(onBack: () -> Unit) {
 
             Button(
                 onClick = {
-                    Toast.makeText(context, "Sin conexion. Intentalo de nuevo en unos segundos.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.playstore_retry_toast), Toast.LENGTH_SHORT).show()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = playStoreGreen),
                 shape = RoundedCornerShape(8.dp),
@@ -134,7 +135,7 @@ fun PlayStoreScreen(onBack: () -> Unit) {
                     .height(44.dp)
                     .padding(horizontal = 16.dp)
             ) {
-                Text("Reintentar", fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.playstore_retry_button), fontWeight = FontWeight.Medium)
             }
 
             Spacer(modifier = Modifier.weight(0.78f))

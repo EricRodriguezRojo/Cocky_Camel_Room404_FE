@@ -9,11 +9,11 @@ import androidx.compose.ui.platform.LocalContext
 
 // ui.theme/Theme.kt
 private val DarkColorScheme = darkColorScheme(
-    primary = OrangeCyber,       // Este es el color de tus botones principales
-    onPrimary = Color.Black,     // El color del texto dentro de los botones
-    background = DarkBackground,  // El fondo de la app
-    surface = SurfaceGray,       // El fondo de tarjetas o menús
-    onSurface = Color.White      // Texto general
+    primary = OrangeCyber,
+    onPrimary = Color.Black,
+    background = DarkBackground,
+    surface = SurfaceGray,
+    onSurface = Color.White
 )
 
 @Composable

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,12 +30,15 @@ data class Alarm(val time: String, val label: String, val isEnabled: Boolean, va
 fun ClockScreen(onBack: () -> Unit) {
     val context = LocalContext.current
 
+    val accessDeniedMsg = stringResource(R.string.access_denied_task_blocked)
+    val functionDisabledMsg = stringResource(R.string.function_disabled_temp)
+
     val initialAlarms = listOf(
-        Alarm("07:00", "Clase DAM", true),
-        Alarm("08:30", "Reunión de proyecto", false),
-        Alarm("04:04", "ERROR_SYS_REBOOT", true, true),
-        Alarm("14:15", "Comida", true),
-        Alarm("19:30", "Gimnasio", false)
+        Alarm("07:00", stringResource(R.string.alarm_dam_class), true),
+        Alarm("08:30", stringResource(R.string.alarm_project_meeting), false),
+        Alarm("04:04", stringResource(R.string.alarm_system_disabled), true, true),
+        Alarm("14:15", stringResource(R.string.alarm_lunch), true),
+        Alarm("19:30", stringResource(R.string.alarm_gym), false)
     )
 
     var alarms by remember { mutableStateOf(initialAlarms) }
@@ -44,10 +48,10 @@ fun ClockScreen(onBack: () -> Unit) {
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("Reloj", color = Color.White, fontWeight = FontWeight.Bold) },
+                    title = { Text(stringResource(R.string.clock_title), color = Color.White, fontWeight = FontWeight.Bold) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF121212))
@@ -66,17 +70,17 @@ fun ClockScreen(onBack: () -> Unit) {
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
-                        text = { Text("Alarmas", color = if (selectedTab == 0) Color(0xFF03A9F4) else Color.Gray) }
+                        text = { Text(stringResource(R.string.tab_alarms), color = if (selectedTab == 0) Color(0xFF03A9F4) else Color.Gray) }
                     )
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
-                        text = { Text("Mundo", color = if (selectedTab == 1) Color(0xFF03A9F4) else Color.Gray) }
+                        text = { Text(stringResource(R.string.tab_world), color = if (selectedTab == 1) Color(0xFF03A9F4) else Color.Gray) }
                     )
                     Tab(
                         selected = selectedTab == 2,
                         onClick = { selectedTab = 2 },
-                        text = { Text("Cronómetro", color = if (selectedTab == 2) Color(0xFF03A9F4) else Color.Gray) }
+                        text = { Text(stringResource(R.string.tab_stopwatch), color = if (selectedTab == 2) Color(0xFF03A9F4) else Color.Gray) }
                     )
                 }
             }
@@ -84,7 +88,7 @@ fun ClockScreen(onBack: () -> Unit) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    Toast.makeText(context, "El sistema no permite nuevas alarmas ahora mismo.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, functionDisabledMsg, Toast.LENGTH_SHORT).show()
                 },
                 containerColor = Color(0xFF03A9F4),
                 contentColor = Color.White,
@@ -133,7 +137,7 @@ fun ClockScreen(onBack: () -> Unit) {
                             checked = alarm.isEnabled,
                             onCheckedChange = { isChecked ->
                                 if (alarm.isSystemLocked) {
-                                    Toast.makeText(context, "ACCESO DENEGADO. Tarea bloqueada por el administrador.", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, accessDeniedMsg, Toast.LENGTH_LONG).show()
                                 } else {
                                     alarms = alarms.map {
                                         if (it.time == alarm.time) it.copy(isEnabled = isChecked) else it
@@ -153,7 +157,7 @@ fun ClockScreen(onBack: () -> Unit) {
             }
         } else {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                Text("Función temporalmente deshabilitada", color = Color.Gray, fontSize = 16.sp)
+                Text(functionDisabledMsg, color = Color.Gray, fontSize = 16.sp)
             }
         }
     }

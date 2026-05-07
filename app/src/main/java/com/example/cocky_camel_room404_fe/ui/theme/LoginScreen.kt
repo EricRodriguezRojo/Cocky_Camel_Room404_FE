@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,32 +74,31 @@ fun LoginScreen(
                             val userRole = loginData?.role ?: "User"
                             SessionManager.saveRole(context, userRole)
 
-                                            // Intentamos obtener el nickname por email (si está disponible)
-                                            try {
-                                                val email = account.email
-                                                if (!email.isNullOrBlank()) {
-                                                    val userResp = RetrofitClient.instance.getUser(email)
-                                                    if (userResp.isSuccessful) {
-                                                        val user = userResp.body()
-                                                        user?.nickname?.let { SessionManager.saveNickname(context, it) }
-                                                    }
-                                                }
-                                            } catch (e: Exception) {}
+                            try {
+                                val email = account.email
+                                if (!email.isNullOrBlank()) {
+                                    val userResp = RetrofitClient.instance.getUser(email)
+                                    if (userResp.isSuccessful) {
+                                        val user = userResp.body()
+                                        user?.nickname?.let { SessionManager.saveNickname(context, it) }
+                                    }
+                                }
+                            } catch (e: Exception) {}
 
-                            Toast.makeText(context, loginData?.message ?: "Acceso concedido", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, loginData?.message ?: context.getString(R.string.login_access_granted), Toast.LENGTH_SHORT).show()
                             onLoginSuccess()
                         } else {
-                            Toast.makeText(context, "Error validando cuenta de Google", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.login_google_error), Toast.LENGTH_SHORT).show()
                         }
                     } catch (e: Exception) {
-                        Toast.makeText(context, "Error de red: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "${context.getString(R.string.login_network_error)}: ${e.message}", Toast.LENGTH_SHORT).show()
                     } finally {
                         isLoading = false
                     }
                 }
             }
         } catch (e: ApiException) {
-            Toast.makeText(context, "Inicio de sesión de Google cancelado", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.login_google_canceled), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -122,7 +122,7 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "ROOM 404",
+                    text = stringResource(R.string.app_name).uppercase(),
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraLight,
                     letterSpacing = 8.sp,
@@ -142,19 +142,28 @@ fun LoginScreen(
                         modifier = Modifier.padding(28.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        MinimalistField(value = username, onValueChange = { username = it }, label = "EMAIL_ADDRESS")
+                        MinimalistField(
+                            value = username,
+                            onValueChange = { username = it },
+                            label = stringResource(R.string.login_email_label)
+                        )
                         Spacer(modifier = Modifier.height(20.dp))
-                        MinimalistField(value = password, onValueChange = { password = it }, label = "PASSKEY", isPassword = true)
+                        MinimalistField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = stringResource(R.string.login_password_label),
+                            isPassword = true
+                        )
                         Spacer(modifier = Modifier.height(32.dp))
 
                         if (isLoading) {
                             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         } else {
                             InteractionButton(
-                                text = "ACCESS SYSTEM",
+                                text = stringResource(R.string.login_access_button),
                                 onClick = {
                                     if (username.isBlank() || password.isBlank()) {
-                                        Toast.makeText(context, "Faltan credenciales", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.login_missing_credentials), Toast.LENGTH_SHORT).show()
                                         return@InteractionButton
                                     }
 
@@ -171,7 +180,6 @@ fun LoginScreen(
                                                 val userRole = loginData?.role ?: "User"
                                                 SessionManager.saveRole(context, userRole)
 
-                                                // Obtener nickname desde backend y guardarlo
                                                 try {
                                                     val userResp = RetrofitClient.instance.getUser(username)
                                                     if (userResp.isSuccessful) {
@@ -180,13 +188,13 @@ fun LoginScreen(
                                                     }
                                                 } catch (e: Exception) {}
 
-                                                Toast.makeText(context, loginData?.message ?: "Conectado", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, loginData?.message ?: context.getString(R.string.login_connected), Toast.LENGTH_SHORT).show()
                                                 onLoginSuccess()
                                             } else {
-                                                Toast.makeText(context, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, context.getString(R.string.login_invalid_credentials), Toast.LENGTH_SHORT).show()
                                             }
                                         } catch (e: Exception) {
-                                            Toast.makeText(context, "Error crítico: ${e.message}", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "${context.getString(R.string.login_critical_error)}: ${e.message}", Toast.LENGTH_SHORT).show()
                                         } finally {
                                             isLoading = false
                                         }
@@ -195,7 +203,7 @@ fun LoginScreen(
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("OR", color = Color.White.copy(alpha = 0.3f), fontSize = 10.sp)
+                            Text(stringResource(R.string.login_or_divider), color = Color.White.copy(alpha = 0.3f), fontSize = 10.sp)
                             Spacer(modifier = Modifier.height(16.dp))
 
                             OutlinedButton(
@@ -208,7 +216,7 @@ fun LoginScreen(
                                 shape = MaterialTheme.shapes.extraSmall,
                                 border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.3f))
                             ) {
-                                Text("CONTINUE WITH GOOGLE", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                Text(stringResource(R.string.login_google_button), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -223,7 +231,7 @@ fun LoginScreen(
                                 )
                             ) {
                                 Text(
-                                    "CREATE NEW CREDENTIALS",
+                                    stringResource(R.string.login_register_link),
                                     color = Color.White,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,

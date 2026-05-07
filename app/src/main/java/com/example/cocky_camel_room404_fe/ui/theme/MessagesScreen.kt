@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,10 +42,10 @@ fun MessagesScreen(onBack: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
 
     val chats = listOf(
-        Chat("1", "Desconocido", "¿Lo has encontrado ya?", "11:45"),
-        Chat("2", "Mamá", "Acuérdate de comprar pan.", "Ayer"),
-        Chat("3", "Compañeros de piso", "Alguien se ha dejado el fuego encendido.", "Ayer"),
-        Chat("4", "Vodafone", "Tu factura ya está disponible.", "Lunes")
+        Chat("1", stringResource(R.string.chat_unknown_name), stringResource(R.string.chat_unknown_last_msg), "11:45"),
+        Chat("2", stringResource(R.string.chat_mom_name), stringResource(R.string.chat_mom_last_msg), stringResource(R.string.mail_date_yesterday)),
+        Chat("3", stringResource(R.string.chat_roommates_name), stringResource(R.string.chat_roommates_last_msg), stringResource(R.string.mail_date_yesterday)),
+        Chat("4", "Vodafone", stringResource(R.string.chat_vodafone_last_msg), stringResource(R.string.chat_date_monday))
     )
 
     var currentChat by remember { mutableStateOf<Chat?>(null) }
@@ -54,6 +55,11 @@ fun MessagesScreen(onBack: () -> Unit) {
     var isGlitching by remember { mutableStateOf(false) }
     var showGlitchOverlay by remember { mutableStateOf(false) }
     var showSystemMessage by remember { mutableStateOf(false) }
+
+    val msgUnknown1 = stringResource(R.string.chat_unknown_msg_1)
+    val msgUnknown2 = stringResource(R.string.chat_unknown_msg_2)
+    val msgUnknown3 = stringResource(R.string.chat_unknown_msg_3)
+    val msgUnknown4 = stringResource(R.string.chat_unknown_msg_4)
 
     val infiniteTransition = rememberInfiniteTransition(label = "")
     val offsetX by infiniteTransition.animateFloat(
@@ -71,10 +77,10 @@ fun MessagesScreen(onBack: () -> Unit) {
     LaunchedEffect(currentChat) {
         if (currentChat?.id == "1") {
             chatMessages = listOf(
-                Message("No sé de qué me hablas.", true),
-                Message("Sabes perfectamente de qué hablo.", false),
-                Message("El tiempo se acaba.", false),
-                Message("¿Lo has encontrado ya?", false)
+                Message(msgUnknown4, false),
+                Message(msgUnknown3, false),
+                Message(msgUnknown2, false),
+                Message(msgUnknown1, false)
             )
         } else if (currentChat != null) {
             chatMessages = listOf(Message(currentChat!!.lastMessage, false))
@@ -90,10 +96,10 @@ fun MessagesScreen(onBack: () -> Unit) {
         if (currentChat == null) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
-                    title = { Text("Mensajes", color = Color.White, fontWeight = FontWeight.Bold) },
+                    title = { Text(stringResource(R.string.messages_title), color = Color.White, fontWeight = FontWeight.Bold) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -145,7 +151,7 @@ fun MessagesScreen(onBack: () -> Unit) {
                     title = { Text(currentChat!!.name, color = Color.White, fontSize = 18.sp) },
                     navigationIcon = {
                         IconButton(onClick = { currentChat = null }) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -189,7 +195,7 @@ fun MessagesScreen(onBack: () -> Unit) {
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(24.dp)),
-                        placeholder = { Text("Mensaje de texto", color = Color.Gray) },
+                        placeholder = { Text(stringResource(R.string.messages_input_placeholder), color = Color.Gray) },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color(0xFF2A2A2A),
                             unfocusedContainerColor = Color(0xFF2A2A2A),
@@ -270,7 +276,7 @@ fun MessagesScreen(onBack: () -> Unit) {
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "SYSTEM_OVERRIDE",
+                            text = stringResource(R.string.messages_glitch_footer),
                             color = Color.Red,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -278,19 +284,11 @@ fun MessagesScreen(onBack: () -> Unit) {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Has forzado una brecha de seguridad. El sistema ha generado un enigma de recuperación.",
+                            text = stringResource(R.string.messages_glitch_body),
                             color = Color.White,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
                             lineHeight = 20.sp
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "REVISA TU BANDEJA DE ENTRADA REAL.",
-                            color = Color.Red,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
                         )
                     }
                 }
