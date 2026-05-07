@@ -105,13 +105,14 @@
     <string name="mail_amazon_body">Your order has been delivered.</string>
     <string name="mail_unknown_sender">Unknown</string>
     <string name="mail_error_start_subject">ERROR START</string>
-    <string name="mail_error_start_body">It all started with the \'malware\' SMS.</string>
+    <string name="mail_error_start_body">It all started when you sent the \'malware\' SMS to that unknown number.</string>
 
     <string name="files_internal_storage">Internal Storage</string>
     <string name="files_access_denied">ACCESS DENIED: Root required</string>
     <string name="files_corrupt">Corrupted file</string>
     <string name="files_gallery_success">Gallery updated successfully</string>
     <string name="files_installing_patch">Installing patch...</string>
+    <string name="messages_glitch_email_instruction">CHECK YOUR REAL EMAIL INBOX.</string>
 
     <string name="calendar_title">Calendar</string>
     <string name="clock_title">Clock</string>
@@ -165,8 +166,8 @@
     <string name="event_dayzero_desc">The start of the error</string>
     <string name="event_bread_title">Buy Bread</string>
     <string name="event_bread_desc">Don\'t forget</string>
-    <string name="event_architect_title">THE ARCHITECT</string>
-    <string name="event_architect_desc">Incoming call...</string>
+    <string name="event_architect_title">Call \'The Architect\' - 6295</string>
+    <string name="event_architect_desc">He knows how to enter the file system. He says he has the gallery patch ready.</string>
     <string name="event_mom_title">Mom\'s Birthday</string>
     <string name="event_mom_desc">Buy gift</string>
     <string name="event_allday">All day</string>

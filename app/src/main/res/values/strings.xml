@@ -89,7 +89,7 @@
     <string name="mail_amazon_body">Tu pedido ha sido entregado.</string>
     <string name="mail_unknown_sender">Desconocido</string>
     <string name="mail_error_start_subject">INICIO DEL ERROR</string>
-    <string name="mail_error_start_body">Todo empezó con el SMS \'malware\'.</string>
+    <string name="mail_error_start_body">Todo empezó cuando enviaste el SMS \'malware\' a ese numero desconodido.</string>
 
     <string name="files_internal_storage">Almacenamiento Interno</string>
     <string name="files_access_denied">ACCESO DENEGADO: Root requerido</string>
@@ -144,6 +144,7 @@
     <string name="menu_settings_title">AJUSTES DEL SISTEMA</string>
     <string name="settings_language">IDIOMA</string>
     <string name="settings_volume">VOLUMEN GENERAL</string>
+    <string name="messages_glitch_email_instruction">REVISA TU BANDEJA DE ENTRADA REAL.</string>
     <string name="lang_es">Castellano</string>
     <string name="lang_ca">Català</string>
     <string name="lang_en">English</string>
@@ -164,8 +165,8 @@
     <string name="event_dayzero_desc">El inicio del error</string>
     <string name="event_bread_title">Comprar Pan</string>
     <string name="event_bread_desc">No te olvides</string>
-    <string name="event_architect_title">THE ARCHITECT</string>
-    <string name="event_architect_desc">Llamada entrante...</string>
+    <string name="event_architect_title">Llamar a \'The Architect\' - 6295</string>
+    <string name="event_architect_desc">Él sabe cómo entrar en el sistema de archivos. Dice que tiene el parche de la galería listo.</string>
     <string name="event_mom_title">Cumpleaños Mamá</string>
     <string name="event_mom_desc">Comprar regalo</string>
     <string name="event_allday">Todo el día</string>

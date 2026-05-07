@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Send
@@ -214,7 +213,6 @@ fun MessagesScreen(onBack: () -> Unit) {
                                 inputText = ""
 
                                 if (currentChat?.id == "1" && textSent.equals("malware", ignoreCase = true)) {
-
                                     val segundosTardados = TimeTracker.getSecondsElapsedAndReset()
 
                                     coroutineScope.launch {
@@ -228,21 +226,18 @@ fun MessagesScreen(onBack: () -> Unit) {
                                                     body = mapOf("timeSeconds" to segundosTardados)
                                                 )
                                             }
-                                        } catch (e: Exception) {
-                                        }
+                                        } catch (e: Exception) { }
                                     }
 
                                     coroutineScope.launch {
                                         isGlitching = true
                                         showGlitchOverlay = true
-
                                         delay(800)
-
                                         isGlitching = false
                                         showGlitchOverlay = false
 
                                         showSystemMessage = true
-                                        delay(4000)
+                                        delay(5000)
                                         showSystemMessage = false
                                     }
                                 }
@@ -283,12 +278,22 @@ fun MessagesScreen(onBack: () -> Unit) {
                             letterSpacing = 2.sp
                         )
                         Spacer(modifier = Modifier.height(16.dp))
+
                         Text(
                             text = stringResource(R.string.messages_glitch_body),
                             color = Color.White,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
                             lineHeight = 20.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = stringResource(R.string.messages_glitch_email_instruction),
+                            color = Color.Red,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }

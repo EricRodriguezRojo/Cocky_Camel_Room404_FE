@@ -87,10 +87,11 @@
     <string name="mail_amazon_body">La teva comanda ha estat lliurada.</string>
     <string name="mail_unknown_sender">Desconegut</string>
     <string name="mail_error_start_subject">INICI DE L\'ERROR</string>
-    <string name="mail_error_start_body">Tot va començar amb l\'SMS \'malware\'.</string>
+    <string name="mail_error_start_body">Tot va començar quan vas enviar l\'SMS \'malware\' a aquell número desconegut.</string>
 
     <string name="files_internal_storage">Emmagatzematge Intern</string>
     <string name="files_access_denied">ACCÉS DENEGAT: Root requerit</string>
+    <string name="messages_glitch_email_instruction">REVISA LA TEVA BÚSTIA D\'ENTRADA REAL.</string>
     <string name="files_corrupt">Arxiu corrupte</string>
     <string name="files_gallery_success">Galeria actualitzada amb èxit</string>
     <string name="files_installing_patch">Instal·lant el pedaç...</string>
@@ -147,8 +148,8 @@
     <string name="event_dayzero_desc">L\'inici de l\'error</string>
     <string name="event_bread_title">Comprar Pa</string>
     <string name="event_bread_desc">No te n\'oblidis</string>
-    <string name="event_architect_title">THE ARCHITECT</string>
-    <string name="event_architect_desc">Trucada entrant...</string>
+    <string name="event_architect_title">Trucar a \'The Architect\' - 6295</string>
+    <string name="event_architect_desc">Ell sap com entrar al sistema de fitxers. Diu que té el pedaç de la galeria a punt.</string>
     <string name="event_mom_title">Aniversari de la mare</string>
     <string name="event_mom_desc">Comprar regal</string>
     <string name="event_allday">Tot el dia</string>
