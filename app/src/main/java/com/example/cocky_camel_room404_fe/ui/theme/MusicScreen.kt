@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,7 +86,7 @@ fun MusicScreen(onBack: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "REPRODUCIENDO AHORA",
+                        text = stringResource(R.string.music_now_playing),
                         color = Color.White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
@@ -94,7 +95,7 @@ fun MusicScreen(onBack: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = { onBack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
@@ -143,7 +144,7 @@ fun MusicScreen(onBack: () -> Unit) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("404_VOID.mp3", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Artista Desconocido", color = Color(0xFFAAAAAA), fontSize = 18.sp)
+                    Text(stringResource(R.string.music_unknown_artist), color = Color(0xFFAAAAAA), fontSize = 18.sp)
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -189,7 +190,7 @@ fun MusicScreen(onBack: () -> Unit) {
                         reproductor.seekTo(nuevaPos)
                         valorSlider = nuevaPos.toFloat()
                     }) {
-                        Icon(Icons.Default.FastRewind, contentDescription = null, tint = Color.White, modifier = Modifier.size(36.dp))
+                        Icon(Icons.Default.FastRewind, contentDescription = stringResource(R.string.music_rewind), tint = Color.White, modifier = Modifier.size(36.dp))
                     }
 
                     Box(
@@ -214,7 +215,7 @@ fun MusicScreen(onBack: () -> Unit) {
 
                         Icon(
                             imageVector = icono,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.music_play_pause),
                             tint = Color.Black,
                             modifier = Modifier.size(36.dp)
                         )
@@ -228,7 +229,7 @@ fun MusicScreen(onBack: () -> Unit) {
                         reproductor.seekTo(nuevaPos)
                         valorSlider = nuevaPos.toFloat()
                     }) {
-                        Icon(Icons.Default.FastForward, contentDescription = null, tint = Color.White, modifier = Modifier.size(36.dp))
+                        Icon(Icons.Default.FastForward, contentDescription = stringResource(R.string.music_forward), tint = Color.White, modifier = Modifier.size(36.dp))
                     }
                 }
             }

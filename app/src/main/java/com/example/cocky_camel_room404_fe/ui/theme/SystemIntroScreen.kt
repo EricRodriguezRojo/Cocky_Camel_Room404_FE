@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,21 +22,21 @@ data class TerminalLine(val text: String, val color: Color)
 @Composable
 fun SystemIntroScreen(onFinished: () -> Unit) {
     val context = LocalContext.current
-    val nickname = SessionManager.getNickname(context) ?: "ANÓNIMO"
 
-    val lines = remember {
-        listOf(
-            TerminalLine("BIENVENIDO, $nickname", Color.Yellow),
-            TerminalLine("BOOTING SAFE_MODE...", Color.Green),
-            TerminalLine("ERROR: BOOT SECTOR CORRUPTED.", Color.Red),
-            TerminalLine("MALWARE DETECTADO: Room404_Architect.exe", Color.Red),
-            TerminalLine("ATTEMPTING SYSTEM UPDATE...", Color.Green),
-            TerminalLine("ACCESS DENIED. CORE APPS ENCRYPTED.", Color.Red),
-            TerminalLine(">> INTERCEPTANDO SEÑAL...", Color.Yellow),
-            TerminalLine(">> THE ARCHITECT: ¿Pensabas que un simple System Update te salvaría? Tu dispositivo es mío. Si quieres recuperarlo, tendrás que jugar a mi juego. Las respuestas que buscas están ocultas en tus propias aplicaciones.", Color.White),
-            TerminalLine(">> OBJETIVO: Desencripta las aplicaciones ancla, encuentra el código maestro y fuerza el SYSTEM UPDATE.", Color.White)
-        )
-    }
+    val anonLabel = stringResource(R.string.intro_anon)
+    val nickname = SessionManager.getNickname(context) ?: anonLabel
+
+    val lines = listOf(
+        TerminalLine(stringResource(R.string.intro_welcome, nickname), Color.Yellow),
+        TerminalLine(stringResource(R.string.intro_booting), Color.Green),
+        TerminalLine(stringResource(R.string.intro_error_boot), Color.Red),
+        TerminalLine(stringResource(R.string.intro_malware), Color.Red),
+        TerminalLine(stringResource(R.string.intro_attempt_update), Color.Green),
+        TerminalLine(stringResource(R.string.intro_access_denied), Color.Red),
+        TerminalLine(stringResource(R.string.intro_intercepting), Color.Yellow),
+        TerminalLine(stringResource(R.string.intro_hacker_msg), Color.White),
+        TerminalLine(stringResource(R.string.intro_objective), Color.White)
+    )
 
     var visibleLines by remember { mutableStateOf(emptyList<TerminalLine>()) }
     var currentLineText by remember { mutableStateOf("") }
@@ -57,12 +58,12 @@ fun SystemIntroScreen(onFinished: () -> Unit) {
             val fullText = lines[i].text
             currentIndex = i
             currentLineText = ""
-            
+
             for (char in fullText) {
                 currentLineText += char
                 delay(30)
             }
-            
+
             visibleLines = visibleLines + lines[i].copy(text = currentLineText)
             currentLineText = ""
             delay(500)
@@ -93,7 +94,7 @@ fun SystemIntroScreen(onFinished: () -> Unit) {
             items(visibleLines) { line ->
                 TerminalText(line.text, line.color)
             }
-            
+
             if (currentIndex < lines.size) {
                 item {
                     Row {

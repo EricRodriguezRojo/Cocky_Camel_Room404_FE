@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,16 @@ fun PhoneScreen(onBack: () -> Unit) {
 
     val scope = rememberCoroutineScope()
 
+    val hackerMessage = stringResource(R.string.phone_hacker_message)
+    val encryptingStr = stringResource(R.string.phone_encrypting)
+    val callingStr = stringResource(R.string.phone_calling)
+    val noNumberStr = stringResource(R.string.phone_no_number)
+    val architectName = stringResource(R.string.event_architect_title)
+    val backStr = stringResource(R.string.back)
+    val callActionStr = stringResource(R.string.phone_call_action)
+    val endCallStr = stringResource(R.string.phone_end_call)
+    val sysErrorStr = stringResource(R.string.calc_err_404)
+
     val mediaPlayer = remember { MediaPlayer.create(context, R.raw.llamada) }
     val tonoPlayer = remember { MediaPlayer.create(context, R.raw.tono) }
 
@@ -46,8 +57,6 @@ fun PhoneScreen(onBack: () -> Unit) {
         }
     }
 
-    val hackerMessage = "¿Quién es?... Ah, el nuevo. Escucha bien. He dejado el parche de la galería en la carpeta del sistema, pero está bajo llave. Para entrar, el código es mi edad actual: Hace 10 años, mi hermano tenía 7 años y yo tenía el doble que él... ¿Cuántos años tengo ahora? Si no eres capaz de resolver esto, no estás listo para lo que viene."
-
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
         if (!isCalling) {
             Row(
@@ -57,7 +66,7 @@ fun PhoneScreen(onBack: () -> Unit) {
                     .padding(top = 24.dp)
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                    Icon(Icons.Default.ArrowBack, contentDescription = backStr, tint = Color.White)
                 }
             }
 
@@ -94,7 +103,7 @@ fun PhoneScreen(onBack: () -> Unit) {
                             if (number.isNotEmpty()) {
                                 isCalling = true
                                 if (number == "6295") {
-                                    callStatus = "Encriptando conexión..."
+                                    callStatus = encryptingStr
 
                                     val segundosTardados = TimeTracker.getSecondsElapsedAndReset()
 
@@ -120,7 +129,7 @@ fun PhoneScreen(onBack: () -> Unit) {
                                         }
                                         tonoPlayer.seekTo(0)
 
-                                        callStatus = "THE_ARCHITECT"
+                                        callStatus = architectName
                                         showHackerText = true
 
                                         mediaPlayer.start()
@@ -131,15 +140,15 @@ fun PhoneScreen(onBack: () -> Unit) {
                                         }
                                     }
                                 } else {
-                                    callStatus = "Llamando..."
+                                    callStatus = callingStr
                                     scope.launch {
                                         delay(2000)
                                         if (number == "404" || number == "0404") {
-                                            callStatus = "ERROR: SYSTEM_BUSY"
+                                            callStatus = sysErrorStr
                                             delay(2000)
                                             isCalling = false
                                         } else {
-                                            callStatus = "Número no asignado"
+                                            callStatus = noNumberStr
                                             delay(1500)
                                             isCalling = false
                                         }
@@ -149,7 +158,7 @@ fun PhoneScreen(onBack: () -> Unit) {
                         },
                         modifier = Modifier.size(72.dp).clip(CircleShape).background(Color(0xFF4CAF50))
                     ) {
-                        Icon(Icons.Default.Call, contentDescription = null, tint = Color.White, modifier = Modifier.size(32.dp))
+                        Icon(Icons.Default.Call, contentDescription = callActionStr, tint = Color.White, modifier = Modifier.size(32.dp))
                     }
                     IconButton(onClick = { if (number.isNotEmpty()) number = number.dropLast(1) }) {
                         Icon(Icons.Default.Backspace, contentDescription = null, tint = Color.Gray)
@@ -201,7 +210,7 @@ fun PhoneScreen(onBack: () -> Unit) {
                     },
                     modifier = Modifier.size(72.dp).clip(CircleShape).background(Color.Red)
                 ) {
-                    Icon(Icons.Default.CallEnd, contentDescription = null, tint = Color.White, modifier = Modifier.size(32.dp))
+                    Icon(Icons.Default.CallEnd, contentDescription = endCallStr, tint = Color.White, modifier = Modifier.size(32.dp))
                 }
             }
         }

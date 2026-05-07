@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,16 +31,24 @@ fun CalendarScreen(onBack: () -> Unit) {
     var selectedDay by remember { mutableStateOf(22) }
 
     val events = listOf(
-        CalendarEvent(3, "Dentista", "16:00", "Revisión anual. Llevar radiografías."),
-        CalendarEvent(7, "Examen DAM", "09:00", "Entregar el proyecto a primera hora."),
-        CalendarEvent(10, "DÍA CERO", "00:00", "No debí descargar ese archivo. El teléfono hace cosas raras."),
-        CalendarEvent(10, "Comprar pan", "14:00", "2 barras integrales."),
-        CalendarEvent(22, "Llamar a 'The Architect' - 6295", "18:30", "Él sabe cómo entrar en el sistema de archivos. Dice que tiene el parche de la galería listo."),
-        CalendarEvent(14, "Cumpleaños Mamá", "Todo el día", "Comprar regalo y llamar por la tarde."),
-        CalendarEvent(28, "Límite de borrado", "23:59", "Si no lo soluciono para hoy, perderé todos mis datos.")
+        CalendarEvent(3, stringResource(R.string.event_dentist_title), "16:00", stringResource(R.string.event_dentist_desc)),
+        CalendarEvent(7, stringResource(R.string.event_exam_title), "09:00", stringResource(R.string.event_exam_desc)),
+        CalendarEvent(10, stringResource(R.string.event_dayzero_title), "00:00", stringResource(R.string.event_dayzero_desc)),
+        CalendarEvent(10, stringResource(R.string.event_bread_title), "14:00", stringResource(R.string.event_bread_desc)),
+        CalendarEvent(22, stringResource(R.string.event_architect_title), "18:30", stringResource(R.string.event_architect_desc)),
+        CalendarEvent(14, stringResource(R.string.event_mom_title), stringResource(R.string.event_allday), stringResource(R.string.event_mom_desc)),
+        CalendarEvent(28, stringResource(R.string.event_deletion_title), "23:59", stringResource(R.string.event_deletion_desc))
     )
 
-    val daysOfWeek = listOf("L", "M", "X", "J", "V", "S", "D")
+    val daysOfWeek = listOf(
+        stringResource(R.string.day_l),
+        stringResource(R.string.day_m),
+        stringResource(R.string.day_x),
+        stringResource(R.string.day_j),
+        stringResource(R.string.day_v),
+        stringResource(R.string.day_s),
+        stringResource(R.string.day_d)
+    )
 
     val emptyDaysBeforeStart = 2
     val totalDaysInMonth = 30
@@ -50,10 +59,10 @@ fun CalendarScreen(onBack: () -> Unit) {
             .background(Color(0xFF121212))
     ) {
         TopAppBar(
-            title = { Text("Abril 2026", color = Color.White, fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.calendar_month_year), color = Color.White, fontWeight = FontWeight.Bold) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                    Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -132,7 +141,7 @@ fun CalendarScreen(onBack: () -> Unit) {
             if (selectedEvents.isEmpty()) {
                 item {
                     Text(
-                        text = "No hay eventos para este día",
+                        text = stringResource(R.string.no_events_msg),
                         color = Color.Gray,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,10 +38,22 @@ fun CameraScreen(onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = stringResource(R.string.close),
+                        tint = Color.White
+                    )
                 }
-                Icon(Icons.Default.FlashOff, contentDescription = null, tint = Color.White)
-                Icon(Icons.Default.Settings, contentDescription = null, tint = Color.White)
+                Icon(
+                    Icons.Default.FlashOff,
+                    contentDescription = stringResource(R.string.flash),
+                    tint = Color.White
+                )
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.settings),
+                    tint = Color.White
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -55,7 +68,7 @@ fun CameraScreen(onBack: () -> Unit) {
             ) {
                 Icon(
                     Icons.Default.PhotoLibrary,
-                    contentDescription = "Galería",
+                    contentDescription = stringResource(R.string.gallery),
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)
                 )
@@ -78,7 +91,7 @@ fun CameraScreen(onBack: () -> Unit) {
 
                 Icon(
                     Icons.Default.FlipCameraAndroid,
-                    contentDescription = "Girar",
+                    contentDescription = stringResource(R.string.flip),
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)
                 )
@@ -101,13 +114,13 @@ fun CameraScreen(onBack: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "ERROR 404",
+                        stringResource(R.string.calc_err_404),
                         color = Color.White,
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Hardware no detectado",
+                        stringResource(R.string.hardware_not_detected),
                         color = Color.White,
                         fontSize = 16.sp
                     )

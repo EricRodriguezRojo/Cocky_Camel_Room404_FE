@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,10 +43,10 @@ fun GalleryScreen(onBack: () -> Unit) {
 
 
     val albums = listOf(
-        GalleryAlbum("Cámara", R.drawable.siete, 128),
+        GalleryAlbum(stringResource(R.string.gallery_camera), R.drawable.siete, 128),
         GalleryAlbum("Instagram", R.drawable.cuatro, 45),
         GalleryAlbum("WhatsApp", R.drawable.dos, 312),
-        GalleryAlbum("Descargas", R.drawable.nueve, 12)
+        GalleryAlbum(stringResource(R.string.gallery_downloads), R.drawable.nueve, 12)
     )
 
     var selectedTab by remember { mutableStateOf(0) }
@@ -58,10 +59,10 @@ fun GalleryScreen(onBack: () -> Unit) {
                 .background(Color.White)
         ) {
             TopAppBar(
-                title = { Text("Fotos", color = Color.Black, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.gallery_title), color = Color.Black, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color(0xFF007AFF)) // Azul iOS
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color(0xFF007AFF))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -81,12 +82,12 @@ fun GalleryScreen(onBack: () -> Unit) {
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    text = { Text("Todas las fotos", color = if (selectedTab == 0) Color(0xFF007AFF) else Color.Gray) }
+                    text = { Text(stringResource(R.string.gallery_tab_all), color = if (selectedTab == 0) Color(0xFF007AFF) else Color.Gray) }
                 )
                 Tab(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    text = { Text("Álbumes", color = if (selectedTab == 1) Color(0xFF007AFF) else Color.Gray) }
+                    text = { Text(stringResource(R.string.gallery_tab_albums), color = if (selectedTab == 1) Color(0xFF007AFF) else Color.Gray) }
                 )
             }
 
@@ -129,7 +130,7 @@ fun GalleryScreen(onBack: () -> Unit) {
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(text = album.name, color = Color.Black, fontWeight = FontWeight.Medium, fontSize = 16.sp)
-                            Text(text = "${album.imageCount} fotos", color = Color.Gray, fontSize = 14.sp)
+                            Text(text = "${album.imageCount} ${stringResource(R.string.gallery_photos_count)}", color = Color.Gray, fontSize = 14.sp)
                         }
                     }
                 }
@@ -146,7 +147,7 @@ fun GalleryScreen(onBack: () -> Unit) {
             ) {
                 Image(
                     painter = painterResource(id = fullScreenImage!!),
-                    contentDescription = "Imagen en grande",
+                    contentDescription = stringResource(R.string.gallery_full_screen_desc),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
@@ -155,7 +156,7 @@ fun GalleryScreen(onBack: () -> Unit) {
                     onClick = { fullScreenImage = null },
                     modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
                 ) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Cerrar", tint = Color.White)
+                    Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.close), tint = Color.White)
                 }
             }
         }

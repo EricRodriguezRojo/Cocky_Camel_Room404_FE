@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,6 +27,10 @@ fun CalculatorScreen(onBack: () -> Unit) {
     var displayText by remember { mutableStateOf("") }
     var isGlitching by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
+    val err404 = stringResource(R.string.calc_err_404)
+    val errMalware = stringResource(R.string.calc_malware_sys)
+    val errCorrupted = stringResource(R.string.calc_corrupted)
 
     val buttons = listOf(
         listOf("AC", "(", ")", "/"),
@@ -44,7 +49,11 @@ fun CalculatorScreen(onBack: () -> Unit) {
             title = { Text("", color = Color.White) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                    Icon(
+                        Icons.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = Color.White
+                    )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -112,11 +121,11 @@ fun CalculatorScreen(onBack: () -> Unit) {
                                                     coroutineScope.launch {
                                                         isGlitching = true
                                                         val originalText = displayText
-                                                        displayText = "ERR_404"
+                                                        displayText = err404
                                                         delay(300)
-                                                        displayText = "MALWARE.SYS"
+                                                        displayText = errMalware
                                                         delay(300)
-                                                        displayText = "CORRUPTED"
+                                                        displayText = errCorrupted
                                                         delay(1000)
                                                         displayText = originalText
                                                         isGlitching = false
@@ -132,7 +141,11 @@ fun CalculatorScreen(onBack: () -> Unit) {
                             contentAlignment = Alignment.Center
                         ) {
                             if (btn == "del") {
-                                Icon(Icons.Filled.Backspace, contentDescription = "Borrar", tint = Color.White)
+                                Icon(
+                                    Icons.Filled.Backspace,
+                                    contentDescription = stringResource(R.string.delete),
+                                    tint = Color.White
+                                )
                             } else {
                                 Text(text = btn, color = txtColor, fontSize = 28.sp, fontWeight = FontWeight.Medium)
                             }

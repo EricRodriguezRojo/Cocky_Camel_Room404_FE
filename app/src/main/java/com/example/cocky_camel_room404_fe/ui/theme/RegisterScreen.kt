@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,7 +54,7 @@ fun RegisterScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "NEW_NODE",
+                    text = stringResource(R.string.app_name).uppercase(),
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraLight,
                     letterSpacing = 8.sp,
@@ -71,11 +72,24 @@ fun RegisterScreen(
                         modifier = Modifier.padding(28.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        MinimalistField(value = nickname, onValueChange = { nickname = it }, label = "ASSIGN_NICKNAME")
+                        MinimalistField(
+                            value = nickname,
+                            onValueChange = { nickname = it },
+                            label = stringResource(R.string.register_nickname_label)
+                        )
                         Spacer(modifier = Modifier.height(20.dp))
-                        MinimalistField(value = email, onValueChange = { email = it }, label = "EMAIL_ADDRESS")
+                        MinimalistField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = stringResource(R.string.login_email_label)
+                        )
                         Spacer(modifier = Modifier.height(20.dp))
-                        MinimalistField(value = password, onValueChange = { password = it }, label = "SECURITY_KEY", isPassword = true)
+                        MinimalistField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = stringResource(R.string.register_password_label),
+                            isPassword = true
+                        )
 
                         Spacer(modifier = Modifier.height(32.dp))
 
@@ -83,10 +97,10 @@ fun RegisterScreen(
                             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         } else {
                             InteractionButton(
-                                text = "CREATE CREDENTIALS",
+                                text = stringResource(R.string.register_create_button),
                                 onClick = {
                                     if (email.isBlank() || password.isBlank() || nickname.isBlank()) {
-                                        Toast.makeText(context, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.register_required_fields), Toast.LENGTH_SHORT).show()
                                         return@InteractionButton
                                     }
 
@@ -103,13 +117,13 @@ fun RegisterScreen(
                                             val response = RetrofitClient.instance.register(newUser)
 
                                             if (response.isSuccessful) {
-                                                Toast.makeText(context, "Nodo creado correctamente", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, context.getString(R.string.register_success), Toast.LENGTH_SHORT).show()
                                                 onRegisterSuccess()
                                             } else {
-                                                Toast.makeText(context, "Error: El email ya existe", Toast.LENGTH_LONG).show()
+                                                Toast.makeText(context, context.getString(R.string.register_email_exists), Toast.LENGTH_LONG).show()
                                             }
                                         } catch (e: Exception) {
-                                            Toast.makeText(context, "Error crítico: ${e.message}", Toast.LENGTH_LONG).show()
+                                            Toast.makeText(context, "${context.getString(R.string.login_critical_error)}: ${e.message}", Toast.LENGTH_LONG).show()
                                         } finally {
                                             isLoading = false
                                         }
@@ -124,7 +138,7 @@ fun RegisterScreen(
 
                 TextButton(onClick = onNavigateToLogin) {
                     Text(
-                        "ALREADY REGISTERED? LOGIN",
+                        text = stringResource(R.string.register_login_link),
                         color = Color.White.copy(alpha = 0.5f),
                         fontSize = 12.sp,
                         letterSpacing = 1.sp

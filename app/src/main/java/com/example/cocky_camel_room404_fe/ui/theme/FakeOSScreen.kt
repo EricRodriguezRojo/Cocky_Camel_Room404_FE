@@ -70,6 +70,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -96,7 +97,7 @@ fun FakeOSScreen(
     var showExitConfirm by remember { mutableStateOf(false) }
 
     BackHandler(enabled = true) {
-        Toast.makeText(context, "Usa el botón EXIT para salir del sistema", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.fakeos_back_toast), Toast.LENGTH_SHORT).show()
     }
 
     LaunchedEffect(Unit) {
@@ -109,45 +110,45 @@ fun FakeOSScreen(
     }
 
     val desktopApps = listOf(
-        FakeApp("Galería", Icons.Filled.PhotoAlbum, Color(0xFF9C27B0), true),
-        FakeApp("Correo", Icons.Filled.Email, Color(0xFFD32F2F), true, true),
-        FakeApp("Notas", Icons.Filled.Edit, Color(0xFFFFC107), true),
-        FakeApp("Ajustes", Icons.Filled.Settings, Color(0xFF607D8B)),
-        FakeApp("Calculadora", Icons.Filled.Calculate, Color(0xFF455A64), true),
-        FakeApp("Calendario", Icons.Filled.DateRange, Color(0xFF03A9F4), true),
-        FakeApp("Reloj", Icons.Filled.AccessTime, Color(0xFF00BCD4), true),
-        FakeApp("Sudoku", Icons.Filled.GridOn, Color(0xFF8BC34A), true),
-        FakeApp("Música", Icons.Filled.MusicNote, Color(0xFFE91E63), true),
-        FakeApp("Internet", Icons.Filled.Public, Color(0xFF2196F3), true),
-        FakeApp("Play Store", Icons.Filled.PlayArrow, Color(0xFF4CAF50), true),
-        FakeApp("Tiempo", Icons.Filled.WbSunny, Color(0xFFFFEB3B), true),
-        FakeApp("Archivos", Icons.Filled.Folder, Color(0xFFFF9800), true),
-        FakeApp("Maps", Icons.Filled.LocationOn, Color(0xFF4CAF50), true),
-        FakeApp("System Update", Icons.Filled.Warning, Color(0xFFFF0000), true, true),
-        FakeApp("EXIT", Icons.Filled.ExitToApp, Color(0xFF18D234), true)
+        FakeApp(stringResource(R.string.app_gallery), Icons.Filled.PhotoAlbum, Color(0xFF9C27B0), true),
+        FakeApp(stringResource(R.string.app_mail), Icons.Filled.Email, Color(0xFFD32F2F), true, true),
+        FakeApp(stringResource(R.string.app_notes), Icons.Filled.Edit, Color(0xFFFFC107), true),
+        FakeApp(stringResource(R.string.app_settings), Icons.Filled.Settings, Color(0xFF607D8B)),
+        FakeApp(stringResource(R.string.app_calculator), Icons.Filled.Calculate, Color(0xFF455A64), true),
+        FakeApp(stringResource(R.string.app_calendar), Icons.Filled.DateRange, Color(0xFF03A9F4), true),
+        FakeApp(stringResource(R.string.app_clock), Icons.Filled.AccessTime, Color(0xFF00BCD4), true),
+        FakeApp(stringResource(R.string.app_sudoku), Icons.Filled.GridOn, Color(0xFF8BC34A), true),
+        FakeApp(stringResource(R.string.app_music), Icons.Filled.MusicNote, Color(0xFFE91E63), true),
+        FakeApp(stringResource(R.string.app_internet), Icons.Filled.Public, Color(0xFF2196F3), true),
+        FakeApp(stringResource(R.string.app_playstore), Icons.Filled.PlayArrow, Color(0xFF4CAF50), true),
+        FakeApp(stringResource(R.string.app_weather), Icons.Filled.WbSunny, Color(0xFFFFEB3B), true),
+        FakeApp(stringResource(R.string.app_files), Icons.Filled.Folder, Color(0xFFFF9800), true),
+        FakeApp(stringResource(R.string.app_maps), Icons.Filled.LocationOn, Color(0xFF4CAF50), true),
+        FakeApp(stringResource(R.string.app_system_update), Icons.Filled.Warning, Color(0xFFFF0000), true, true),
+        FakeApp(stringResource(R.string.app_exit), Icons.Filled.ExitToApp, Color(0xFF18D234), true)
     )
 
     val dockApps = listOf(
-        FakeApp("Teléfono", Icons.Filled.Phone, Color(0xFF4CAF50), true),
-        FakeApp("Mensajes", Icons.AutoMirrored.Filled.Message, Color(0xFF2196F3), true),
-        FakeApp("Cámara", Icons.Filled.CameraAlt, Color(0xFF333333), true)
+        FakeApp(stringResource(R.string.app_phone), Icons.Filled.Phone, Color(0xFF4CAF50), true),
+        FakeApp(stringResource(R.string.app_messages), Icons.AutoMirrored.Filled.Message, Color(0xFF2196F3), true),
+        FakeApp(stringResource(R.string.app_camera), Icons.Filled.CameraAlt, Color(0xFF333333), true)
     )
 
     if (showExitConfirm) {
         AlertDialog(
             onDismissRequest = { showExitConfirm = false },
-            title = { Text("¿Seguro que quieres abandonar la partida?") },
+            title = { Text(stringResource(R.string.confirm_exit_title)) },
             confirmButton = {
                 TextButton(onClick = {
                     showExitConfirm = false
                     onAppOpened("EXIT")
                 }) {
-                    Text("Confirmar", color = Color.Red)
+                    Text(stringResource(R.string.accept), color = Color.Red)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showExitConfirm = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -187,12 +188,12 @@ fun FakeOSScreen(
             ) {
                 items(desktopApps) { app ->
                     AppIcon(app = app) {
-                        if (app.name == "EXIT") {
+                        if (app.name == context.getString(R.string.app_exit)) {
                             showExitConfirm = true
                         } else if (app.isFunctional) {
                             onAppOpened(app.name)
                         } else {
-                            Toast.makeText(context, "${app.name} no responde...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "${app.name} ${context.getString(R.string.app_not_responding)}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -210,7 +211,7 @@ fun FakeOSScreen(
                         if (app.isFunctional) {
                             onAppOpened(app.name)
                         } else {
-                            Toast.makeText(context, "Error al abrir ${app.name}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "${context.getString(R.string.error_opening_app)} ${app.name}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -255,7 +256,7 @@ fun FakeGoogleSearchBar() {
             tint = Color.White,
             modifier = Modifier.clickable {
                 if (searchQuery.isNotEmpty()) {
-                    Toast.makeText(context, "Error de conexión de red", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.network_connection_error), Toast.LENGTH_SHORT).show()
                     focusManager.clearFocus()
                 }
             }
@@ -271,7 +272,7 @@ fun FakeGoogleSearchBar() {
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
                 onSearch = {
-                    Toast.makeText(context, "Error de conexión de red", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.network_connection_error), Toast.LENGTH_SHORT).show()
                     focusManager.clearFocus()
                 }
             ),
@@ -279,7 +280,7 @@ fun FakeGoogleSearchBar() {
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (searchQuery.isEmpty()) {
                         Text(
-                            text = "Buscar...",
+                            text = stringResource(R.string.search_placeholder),
                             color = Color.LightGray,
                             fontSize = 16.sp
                         )
@@ -294,7 +295,7 @@ fun FakeGoogleSearchBar() {
             contentDescription = null,
             tint = Color.LightGray,
             modifier = Modifier.clickable {
-                Toast.makeText(context, "El micrófono no responde", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.mic_not_responding), Toast.LENGTH_SHORT).show()
             }
         )
     }

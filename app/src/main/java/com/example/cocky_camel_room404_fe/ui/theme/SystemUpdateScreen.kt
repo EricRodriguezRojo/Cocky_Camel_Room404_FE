@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -157,7 +158,7 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "SYSTEM JAMMED\nCRITICAL ERROR",
+                        text = stringResource(R.string.system_update_jammed),
                         color = Color.Red.copy(alpha = alphaAnim),
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
@@ -166,7 +167,7 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(48.dp))
                     Text(
-                        text = "SHAKE DEVICE TO OVERRIDE",
+                        text = stringResource(R.string.system_update_shake),
                         color = Color.White,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
@@ -184,7 +185,7 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "LOW BATTERY DETECTED\nUPDATE ABORTED",
+                        text = stringResource(R.string.system_update_insufficient),
                         color = Color(0xFFFF9800),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -193,7 +194,7 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(48.dp))
                     Text(
-                        text = "CONNECT POWER SOURCE\nIMMEDIATELY",
+                        text = stringResource(R.string.system_update_connect_power),
                         color = Color.White.copy(alpha = alphaAnim),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -232,7 +233,7 @@ fun SystemUpdateScreen(onFinish: () -> Unit) {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "MALWARE DELETED.\nYOU ESCAPED ROOM 404.",
+                            text = "${stringResource(R.string.system_update_virus_deleted)}\n${stringResource(R.string.system_update_escaped)}",
                             color = Color.White,
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,

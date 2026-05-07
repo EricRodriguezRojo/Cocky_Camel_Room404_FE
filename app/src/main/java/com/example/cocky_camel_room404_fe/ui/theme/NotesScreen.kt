@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,28 +30,28 @@ fun NotesScreen(onBack: () -> Unit) {
 
     val notes = listOf(
         Note(
-            title = "Lista de la compra",
-            content = "- Leche\n- Huevos\n- Pan de molde\n- Café (MUCHO CAFÉ)",
-            date = "Hoy, 09:30"
+            title = stringResource(R.string.note_shopping_title),
+            content = stringResource(R.string.note_shopping_content),
+            date = stringResource(R.string.mail_date_today_time)
         ),
         Note(
-            title = "Ideas TFG",
-            content = "Hacer una app que simule un móvil hackeado. Se llamará Room 404. El logo tiene que ser el camello de Cocky Camel sí o sí.",
-            date = "Ayer, 16:20"
+            title = stringResource(R.string.note_tfg_title),
+            content = stringResource(R.string.note_tfg_content),
+            date = stringResource(R.string.mail_date_yesterday_time)
         ),
         Note(
-            title = "NO BORRAR",
-            content = "El sistema está actuando raro desde que me bajé aquel archivo. A veces la pantalla parpadea. Si pasa algo, el código de reseteo me lo mandaron por correo.",
+            title = stringResource(R.string.note_dontdelete_title),
+            content = stringResource(R.string.note_dontdelete_content),
             date = "10 May, 23:15"
         ),
         Note(
-            title = "Gimnasio - Rutina",
-            content = "Lunes: Pecho y Tríceps\nMartes: Espalda y Bíceps\nMiércoles: Pierna (no saltarse el día de pierna por favor)",
+            title = stringResource(R.string.note_gym_title),
+            content = stringResource(R.string.note_gym_content),
             date = "01 May, 08:00"
         ),
         Note(
-            title = "Contraseñas (Temporales)",
-            content = "Wifi casa: cockycamel2026\nNetflix: (cambiada, pedir a mamá)",
+            title = stringResource(R.string.note_passwords_title),
+            content = stringResource(R.string.note_passwords_content),
             date = "15 Abr, 12:45"
         )
     )
@@ -58,10 +59,10 @@ fun NotesScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notas", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.notes_title), color = Color.White, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -70,12 +71,12 @@ fun NotesScreen(onBack: () -> Unit) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    Toast.makeText(context, "Error de escritura: Almacenamiento corrupto", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.notes_error_storage), Toast.LENGTH_SHORT).show()
                 },
                 containerColor = Color(0xFF03A9F4),
                 contentColor = Color.White
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Añadir nota")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add))
             }
         },
         containerColor = Color(0xFF121212)
@@ -123,7 +124,7 @@ fun NotesScreen(onBack: () -> Unit) {
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) } // Espacio para que el botón flotante no tape la última nota
+            item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +33,10 @@ fun AdminMailScreen(onBack: () -> Unit) {
     var editingEmailId by remember { mutableStateOf<Int?>(null) }
     var inputSender by remember { mutableStateOf("") }
     var inputBody by remember { mutableStateOf("") }
+
+    val msgDeleted = stringResource(R.string.email_deleted)
+    val msgCreated = stringResource(R.string.email_created)
+    val msgUpdated = stringResource(R.string.email_updated)
 
     fun loadEmails() {
         coroutineScope.launch {
@@ -52,7 +57,7 @@ fun AdminMailScreen(onBack: () -> Unit) {
                 val response = RetrofitClient.instance.deleteEmail(id)
                 if (response.isSuccessful) {
                     loadEmails()
-                    Toast.makeText(context, "Correo eliminado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, msgDeleted, Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -68,7 +73,7 @@ fun AdminMailScreen(onBack: () -> Unit) {
                 if (response.isSuccessful) {
                     loadEmails()
                     showDialog = false
-                    Toast.makeText(context, "Correo creado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, msgCreated, Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -84,7 +89,7 @@ fun AdminMailScreen(onBack: () -> Unit) {
                 if (response.isSuccessful) {
                     loadEmails()
                     showDialog = false
-                    Toast.makeText(context, "Correo actualizado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, msgUpdated, Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -99,20 +104,22 @@ fun AdminMailScreen(onBack: () -> Unit) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text(if (editingEmailId == null) "Nuevo Correo" else "Editar Correo") },
+            title = {
+                Text(if (editingEmailId == null) stringResource(R.string.new_email) else stringResource(R.string.edit_email))
+            },
             text = {
                 Column {
                     OutlinedTextField(
                         value = inputSender,
                         onValueChange = { inputSender = it },
-                        label = { Text("Remitente") },
+                        label = { Text(stringResource(R.string.sender)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = inputBody,
                         onValueChange = { inputBody = it },
-                        label = { Text("Contenido del mensaje") },
+                        label = { Text(stringResource(R.string.message_content)) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3
                     )
@@ -128,12 +135,12 @@ fun AdminMailScreen(onBack: () -> Unit) {
                         }
                     }
                 }) {
-                    Text("Guardar")
+                    Text(stringResource(R.string.save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -142,10 +149,10 @@ fun AdminMailScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Admin Panel - Correos", color = Color.White) },
+                title = { Text(stringResource(R.string.admin_panel_emails), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -161,7 +168,7 @@ fun AdminMailScreen(onBack: () -> Unit) {
                 },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Añadir Correo", tint = Color.Black)
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_email), tint = Color.Black)
             }
         }
     ) { paddingValues ->
@@ -191,7 +198,12 @@ fun AdminMailScreen(onBack: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = "De: ${email.sender}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(
+                                    text = "${stringResource(R.string.from)}: ${email.sender}",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(text = email.bodyText, color = Color.LightGray, fontSize = 14.sp)
                             }
@@ -202,10 +214,10 @@ fun AdminMailScreen(onBack: () -> Unit) {
                                     inputBody = email.bodyText
                                     showDialog = true
                                 }) {
-                                    Icon(Icons.Filled.Edit, contentDescription = "Editar", tint = Color.White)
+                                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit), tint = Color.White)
                                 }
                                 IconButton(onClick = { email.id?.let { deleteEmail(it) } }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = Color.Red)
+                                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Red)
                                 }
                             }
                         }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -36,12 +37,15 @@ fun MailScreen(onBack: () -> Unit) {
     var dbEmails by remember { mutableStateOf<List<Email>>(emptyList()) }
     var selectedEmail by remember { mutableStateOf<Email?>(null) }
 
+    val systemSubject = stringResource(R.string.mail_system_subject)
+    val todayText = stringResource(R.string.mail_date_today)
+
     val staticEmails = listOf(
-        Email("Netflix", "Actualiza tu método de pago", "Tu suscripción caducará pronto si no actualizas tu tarjeta de crédito.", "12:30", true),
-        Email("Amazon", "Tu paquete ha sido entregado", "El paquete con tu pedido ha sido entregado en la puerta.", "Ayer", true),
-        Email("Desconocido", "INICIO DEL ERROR", "Todo empezó cuando enviaste la palabra 'malware' por SMS a ese número extraño. No debiste hacerlo.", "10 May", false),
-        Email("LinkedIn", "Tienes 3 nuevas visualizaciones de perfil", "Entra para ver quién ha estado viendo tu perfil esta semana.", "08 May", true),
-        Email("Steam", "Ofertas de fin de semana", "Cientos de juegos con hasta un 80% de descuento.", "05 May", true)
+        Email("Netflix", stringResource(R.string.mail_netflix_subject), stringResource(R.string.mail_netflix_body), "12:30", true),
+        Email("Amazon", stringResource(R.string.mail_amazon_subject), stringResource(R.string.mail_amazon_body), stringResource(R.string.mail_date_yesterday), true),
+        Email(stringResource(R.string.mail_unknown_sender), stringResource(R.string.mail_error_start_subject), stringResource(R.string.mail_error_start_body), "10 May", false),
+        Email("LinkedIn", stringResource(R.string.mail_linkedin_subject), stringResource(R.string.mail_linkedin_body), "08 May", true),
+        Email("Steam", stringResource(R.string.mail_steam_subject), stringResource(R.string.mail_steam_body), "05 May", true)
     )
 
     LaunchedEffect(Unit) {
@@ -53,9 +57,9 @@ fun MailScreen(onBack: () -> Unit) {
                     dbEmails = dtos.map { dto ->
                         Email(
                             sender = dto.sender,
-                            subject = "Mensaje del sistema",
+                            subject = systemSubject,
                             body = dto.bodyText,
-                            date = "Hoy",
+                            date = todayText,
                             isRead = false
                         )
                     }
@@ -78,7 +82,7 @@ fun MailScreen(onBack: () -> Unit) {
                 title = { Text("", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { selectedEmail = null }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -96,7 +100,7 @@ fun MailScreen(onBack: () -> Unit) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(text = selectedEmail!!.sender, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                        Text(text = "a mí", color = Color.Gray, fontSize = 14.sp)
+                        Text(text = stringResource(R.string.mail_to_me), color = Color.Gray, fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Text(text = selectedEmail!!.date, color = Color.Gray, fontSize = 14.sp)
@@ -112,10 +116,10 @@ fun MailScreen(onBack: () -> Unit) {
                 .background(Color(0xFF121212))
         ) {
             TopAppBar(
-                title = { Text("Recibidos", color = Color.White) },
+                title = { Text(stringResource(R.string.mail_inbox_title), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -150,7 +154,7 @@ fun MailScreen(onBack: () -> Unit) {
                             Text(text = email.body, color = Color.Gray, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
-                    Divider(color = Color.DarkGray, thickness = 0.5.dp)
+                    HorizontalDivider(color = Color.DarkGray, thickness = 0.5.dp)
                 }
             }
         }
