@@ -97,6 +97,20 @@
     <string name="files_gallery_success">Galería actualizada con éxito</string>
     <string name="files_installing_patch">Instalando parche...</string>
 
+    <string name="sys_category_device">Dispositivo</string>
+    <string name="sys_wifi">Red e Internet</string>
+    <string name="sys_wifi_sub">Wi-Fi, Red móvil, Datos</string>
+    <string name="sys_display">Pantalla</string>
+    <string name="sys_display_sub">Brillo, Fondo de pantalla</string>
+    <string name="sys_battery">Batería</string>
+    <string name="sys_battery_sub">78% - Sin cargar</string>
+    <string name="sys_storage">Almacenamiento</string>
+    <string name="sys_storage_sub">14 GB libres de 32 GB</string>
+    <string name="sys_security">Seguridad</string>
+    <string name="sys_security_sub">PIN, Huella digital</string>
+    <string name="sys_about">Información</string>
+    <string name="sys_about_sub">FakeOS v4.0.4</string>
+
     <string name="calendar_title">Calendario</string>
     <string name="clock_title">Reloj</string>
     <string name="alarm_label">Alarma</string>

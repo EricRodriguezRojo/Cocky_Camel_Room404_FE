@@ -102,6 +102,7 @@ class MainActivity : AppCompatActivity() {
                                             if (isGalleryPatched) navController.navigate("gallery") { launchSingleTop = true }
                                             else Toast.makeText(context, "ERROR: App corrupta. Reinstale vía APK.", Toast.LENGTH_LONG).show()
                                         }
+                                        "Ajustes", "Settings", "Configuració" -> navController.navigate("system_settings") { launchSingleTop = true }
                                         "Sudoku" -> navController.navigate("sudoku") { launchSingleTop = true }
                                         "Mensajes" -> navController.navigate("messages") { launchSingleTop = true }
                                         "Notas" -> navController.navigate("notes") { launchSingleTop = true }
@@ -227,6 +228,7 @@ class MainActivity : AppCompatActivity() {
                         composable("internet") { InternetScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("play_store") { PlayStoreScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                         composable("settings") { SettingsScreen(onBack = { navController.popBackStack() }) }
+                        composable("system_settings") { SystemSettingsScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
                     }
                 }
             }
