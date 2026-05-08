@@ -1,5 +1,6 @@
 package com.example.cocky_camel_room404_fe
 
+import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -45,6 +46,20 @@ fun SystemIntroScreen(onFinished: () -> Unit) {
     var sequenceFinished by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
+
+    DisposableEffect(Unit) {
+        val mediaPlayer = MediaPlayer.create(context, R.raw.glitch).apply {
+            isLooping = true
+            start()
+        }
+
+        onDispose {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.stop()
+            }
+            mediaPlayer.release()
+        }
+    }
 
     LaunchedEffect(Unit) {
         while (true) {
