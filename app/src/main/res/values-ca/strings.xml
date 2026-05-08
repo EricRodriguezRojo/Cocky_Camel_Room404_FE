@@ -236,6 +236,19 @@
     <string name="note_passwords_title">Contrasenyes (Temporals)</string>
     <string name="note_passwords_content">Wifi casa: cockycamel2026\nNetflix: (canviada, demanar a la mare)</string>
 
+    <string name="sys_category_device">Dispositiu</string>
+    <string name="sys_wifi">Xarxa i Internet</string>
+    <string name="sys_wifi_sub">Wi-Fi, Xarxa mòbil, Dades</string>
+    <string name="sys_display">Pantalla</string>
+    <string name="sys_display_sub">Brillantor, Fons de pantalla</string>
+    <string name="sys_battery">Bateria</string>
+    <string name="sys_battery_sub">78% - Sense carregar</string>
+    <string name="sys_storage">Emmagatzematge</string>
+    <string name="sys_storage_sub">14 GB lliures de 32 GB</string>
+    <string name="sys_security">Seguretat</string>
+    <string name="sys_security_sub">PIN, Petjada digital</string>
+    <string name="sys_about">Informació</string>
+    <string name="sys_about_sub">FakeOS v4.0.4</string>
     <string name="mail_date_today_time">Avui, 09:30</string>
     <string name="mail_date_yesterday_time">Ahir, 16:20</string>
     <string name="phone_hacker_message">Qui és?... Ah, el nou. Escolta bé. He deixat el pedaç de la galeria a la carpeta del sistema, però està sota clau. Per entrar-hi, el codi és la meva edat actual: Fa 10 anys, el meu germà en tenia 7 i jo en tenia el doble que ell... Quants anys tinc ara? Si no ets capaç de resoldre això, no estàs llest per al que vindrà.</string>

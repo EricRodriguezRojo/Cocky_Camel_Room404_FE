@@ -113,7 +113,7 @@ fun FakeOSScreen(
         FakeApp(stringResource(R.string.app_gallery), Icons.Filled.PhotoAlbum, Color(0xFF9C27B0), true),
         FakeApp(stringResource(R.string.app_mail), Icons.Filled.Email, Color(0xFFD32F2F), true, true),
         FakeApp(stringResource(R.string.app_notes), Icons.Filled.Edit, Color(0xFFFFC107), true),
-        FakeApp(stringResource(R.string.app_settings), Icons.Filled.Settings, Color(0xFF607D8B)),
+        FakeApp(stringResource(R.string.app_settings), Icons.Filled.Settings, Color(0xFF607D8B), true),
         FakeApp(stringResource(R.string.app_calculator), Icons.Filled.Calculate, Color(0xFF455A64), true),
         FakeApp(stringResource(R.string.app_calendar), Icons.Filled.DateRange, Color(0xFF03A9F4), true),
         FakeApp(stringResource(R.string.app_clock), Icons.Filled.AccessTime, Color(0xFF00BCD4), true),
