@@ -1,5 +1,7 @@
 package com.example.cocky_camel_room404_fe
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -87,6 +89,23 @@ data class FakeApp(
     val isFunctional: Boolean = false,
     val requiresPin: Boolean = false
 )
+
+fun playIconClickSound(context: Context) {
+    val isGlitch = Random.nextFloat() < 0.20f
+
+    val soundResId = if (isGlitch) {
+        R.raw.beeper_hak
+    } else {
+        R.raw.beeper_normal
+    }
+
+    MediaPlayer.create(context, soundResId)?.apply {
+        setOnCompletionListener {
+            it.release()
+        }
+        start()
+    }
+}
 
 @Composable
 fun FakeOSScreen(
@@ -188,6 +207,8 @@ fun FakeOSScreen(
             ) {
                 items(desktopApps) { app ->
                     AppIcon(app = app) {
+                        playIconClickSound(context)
+
                         if (app.name == context.getString(R.string.app_exit)) {
                             showExitConfirm = true
                         } else if (app.isFunctional) {
@@ -208,6 +229,8 @@ fun FakeOSScreen(
             ) {
                 dockApps.forEach { app ->
                     AppIcon(app = app, showLabel = false) {
+                        playIconClickSound(context)
+
                         if (app.isFunctional) {
                             onAppOpened(app.name)
                         } else {
