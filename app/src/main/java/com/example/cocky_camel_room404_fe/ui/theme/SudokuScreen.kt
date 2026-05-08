@@ -100,7 +100,7 @@ fun SudokuScreen(onBack: () -> Unit) {
                         }
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF8F00)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF8F00), contentColor = Color.White),
                 enabled = hintsRemaining > 0 && selectedCell != null
             ) {
                 Icon(Icons.Filled.Info, null, tint = Color.White)
@@ -186,7 +186,10 @@ fun SudokuScreen(onBack: () -> Unit) {
                             },
                             modifier = Modifier.weight(1f).aspectRatio(1f),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A))
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF2A2A2A),
+                                contentColor = Color.White
+                            )
                         ) {
                             Text(num.toString(), fontSize = 22.sp)
                         }
@@ -202,7 +205,10 @@ fun SudokuScreen(onBack: () -> Unit) {
                             },
                             modifier = Modifier.weight(1f).aspectRatio(1f),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF6679))
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFCF6679),
+                                contentColor = Color.White
+                            )
                         ) {
                             Text("X", fontSize = 22.sp, fontWeight = FontWeight.Bold)
                         }
