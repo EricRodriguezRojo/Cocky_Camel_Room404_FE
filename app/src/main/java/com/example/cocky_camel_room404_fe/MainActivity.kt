@@ -18,8 +18,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cocky_camel_room404_fe.ui.theme.CalendarScreen
 import com.example.cocky_camel_room404_fe.ui.theme.Room404Theme
 import kotlinx.coroutines.launch
+import com.example.cocky_camel_room404_fe.ui.theme.SystemIntroScreen
+
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,10 +89,10 @@ class MainActivity : AppCompatActivity() {
                         composable("ranking") { RankingScreen(onBack = { if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack() }) }
 
                         composable("fake_os") {
-                            FakeOSScreen(onAppOpened = { appName ->
+                            FakeOSScreen(onAppOpened = { appResId ->
                                 if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                                    when (appName) {
-                                        "Archivos" -> {
+                                    when (appResId) {
+                                        R.string.app_files -> {
                                             if (SessionManager.isAppUnlocked(context, "Archivos")) {
                                                 navController.navigate("files") { launchSingleTop = true }
                                             } else {
@@ -98,35 +101,37 @@ class MainActivity : AppCompatActivity() {
                                                 navController.navigate("lock_screen") { launchSingleTop = true }
                                             }
                                         }
-                                        "Galería" -> {
+                                        R.string.app_gallery -> {
                                             if (isGalleryPatched) navController.navigate("gallery") { launchSingleTop = true }
                                             else Toast.makeText(context, "ERROR: App corrupta. Reinstale vía APK.", Toast.LENGTH_LONG).show()
                                         }
-                                        "Ajustes", "Settings", "Configuració" -> navController.navigate("system_settings") { launchSingleTop = true }
-                                        "Sudoku" -> navController.navigate("sudoku") { launchSingleTop = true }
-                                        "Mensajes" -> navController.navigate("messages") { launchSingleTop = true }
-                                        "Notas" -> navController.navigate("notes") { launchSingleTop = true }
-                                        "Calculadora" -> navController.navigate("calculator") { launchSingleTop = true }
-                                        "Calendario" -> navController.navigate("calendar") { launchSingleTop = true }
-                                        "Reloj" -> navController.navigate("clock") { launchSingleTop = true }
-                                        "Música" -> navController.navigate("music") { launchSingleTop = true }
-                                        "Tiempo" -> navController.navigate("weather") { launchSingleTop = true }
-                                        "Maps" -> navController.navigate("maps") { launchSingleTop = true }
-                                        "Teléfono" -> navController.navigate("phone") { launchSingleTop = true }
-                                        "Cámara" -> navController.navigate("camera") { launchSingleTop = true }
-                                        "Internet" -> navController.navigate("internet") { launchSingleTop = true }
-                                        "Play Store" -> navController.navigate("play_store") { launchSingleTop = true }
-                                        "Correo" -> {
-                                            if (SessionManager.isAppUnlocked(context, "Correo")) {
-                                                if (SessionManager.getRole(context) == "Admin") navController.navigate("admin_mail") { launchSingleTop = true }
-                                                else navController.navigate("mail") { launchSingleTop = true }
+                                        R.string.app_settings -> navController.navigate("system_settings") { launchSingleTop = true }
+                                        R.string.app_sudoku -> navController.navigate("sudoku") { launchSingleTop = true }
+                                        R.string.app_messages -> navController.navigate("messages") { launchSingleTop = true }
+                                        R.string.app_notes -> navController.navigate("notes") { launchSingleTop = true }
+                                        R.string.app_calculator -> navController.navigate("calculator") { launchSingleTop = true }
+                                        R.string.app_calendar -> navController.navigate("calendar") { launchSingleTop = true }
+                                        R.string.app_clock -> navController.navigate("clock") { launchSingleTop = true }
+                                        R.string.app_music -> navController.navigate("music") { launchSingleTop = true }
+                                        R.string.app_weather -> navController.navigate("weather") { launchSingleTop = true }
+                                        R.string.app_maps -> navController.navigate("maps") { launchSingleTop = true }
+                                        R.string.app_phone -> navController.navigate("phone") { launchSingleTop = true }
+                                        R.string.app_camera -> navController.navigate("camera") { launchSingleTop = true }
+                                        R.string.app_internet -> navController.navigate("internet") { launchSingleTop = true }
+                                        R.string.app_playstore -> navController.navigate("play_store") { launchSingleTop = true }
+                                        R.string.app_mail -> {
+                                            val role = SessionManager.getRole(context)
+                                            if (role == "Admin") {
+                                                navController.navigate("admin_mail") { launchSingleTop = true }
+                                            } else if (SessionManager.isAppUnlocked(context, "Correo")) {
+                                                navController.navigate("mail") { launchSingleTop = true }
                                             } else {
                                                 appToUnlock = "Correo"
                                                 requiredPin = "7429"
                                                 navController.navigate("lock_screen") { launchSingleTop = true }
                                             }
                                         }
-                                        "System Update" -> {
+                                        R.string.app_system_update -> {
                                             if (SessionManager.isAppUnlocked(context, "System Update")) {
                                                 navController.navigate("system_update") { launchSingleTop = true }
                                             } else {
@@ -135,8 +140,7 @@ class MainActivity : AppCompatActivity() {
                                                 navController.navigate("lock_screen") { launchSingleTop = true }
                                             }
                                         }
-                                        "EXIT" -> navController.navigate("main_menu") { popUpTo("fake_os") { inclusive = true } }
-                                        else -> Toast.makeText(context, "Abriendo $appName...", Toast.LENGTH_SHORT).show()
+                                        R.string.app_exit -> navController.navigate("main_menu") { popUpTo("fake_os") { inclusive = true } }
                                     }
                                 }
                             })
@@ -157,7 +161,7 @@ class MainActivity : AppCompatActivity() {
                                                     "Archivos" -> "System Breach"
                                                     else -> "System Override"
                                                 }
-                                                RetrofitClient.instance.completePuzzle(token = "Bearer $token", puzzleName = pName, body = mapOf("timeSeconds" to segundos))
+                                                RetrofitClient.instance.completePuzzle(token = "Bearer $token", puzzleName = pName, body = mapOf("timeSeconds" to segundos.toInt()))
                                             }
                                         } catch (e: Exception) {}
                                     }

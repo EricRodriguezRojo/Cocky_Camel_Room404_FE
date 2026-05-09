@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,24 +22,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class GalleryAlbum(
-    val name: String,
-    val coverImage: Int,
-    val imageCount: Int
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen(onBack: () -> Unit) {
+fun GalleryScreen(
+    onBack: () -> Unit,
+    viewModel: GalleryViewModel = viewModel()
+) {
     val allPhotos = listOf(
-        R.drawable.selfie1, R.drawable.selfie2,R.drawable.cuatro,
-        R.drawable.selfie3,R.drawable.dos, R.drawable.foto1,
-        R.drawable.foto2,R.drawable.nueve, R.drawable.foto3,
+        R.drawable.selfie1, R.drawable.selfie2, R.drawable.cuatro,
+        R.drawable.selfie3, R.drawable.dos, R.drawable.foto1,
+        R.drawable.foto2, R.drawable.nueve, R.drawable.foto3,
         R.drawable.foto4, R.drawable.foto5, R.drawable.foto6,
         R.drawable.albora1, R.drawable.albora2, R.drawable.albora3,
     )
-
 
     val albums = listOf(
         GalleryAlbum(stringResource(R.string.gallery_camera), R.drawable.siete, 128),
@@ -48,9 +45,6 @@ fun GalleryScreen(onBack: () -> Unit) {
         GalleryAlbum("WhatsApp", R.drawable.dos, 312),
         GalleryAlbum(stringResource(R.string.gallery_downloads), R.drawable.nueve, 12)
     )
-
-    var selectedTab by remember { mutableStateOf(0) }
-    var fullScreenImage by remember { mutableStateOf<Int?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -69,29 +63,29 @@ fun GalleryScreen(onBack: () -> Unit) {
             )
 
             TabRow(
-                selectedTabIndex = selectedTab,
+                selectedTabIndex = viewModel.selectedTab,
                 containerColor = Color.White,
                 contentColor = Color(0xFF007AFF),
                 indicator = { tabPositions ->
                     TabRowDefaults.SecondaryIndicator(
-                        Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                        Modifier.tabIndicatorOffset(tabPositions[viewModel.selectedTab]),
                         color = Color(0xFF007AFF)
                     )
                 }
             ) {
                 Tab(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    text = { Text(stringResource(R.string.gallery_tab_all), color = if (selectedTab == 0) Color(0xFF007AFF) else Color.Gray) }
+                    selected = viewModel.selectedTab == 0,
+                    onClick = { viewModel.onTabSelected(0) },
+                    text = { Text(stringResource(R.string.gallery_tab_all), color = if (viewModel.selectedTab == 0) Color(0xFF007AFF) else Color.Gray) }
                 )
                 Tab(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    text = { Text(stringResource(R.string.gallery_tab_albums), color = if (selectedTab == 1) Color(0xFF007AFF) else Color.Gray) }
+                    selected = viewModel.selectedTab == 1,
+                    onClick = { viewModel.onTabSelected(1) },
+                    text = { Text(stringResource(R.string.gallery_tab_albums), color = if (viewModel.selectedTab == 1) Color(0xFF007AFF) else Color.Gray) }
                 )
             }
 
-            if (selectedTab == 0) {
+            if (viewModel.selectedTab == 0) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier.fillMaxSize(),
@@ -104,7 +98,7 @@ fun GalleryScreen(onBack: () -> Unit) {
                             contentDescription = null,
                             modifier = Modifier
                                 .aspectRatio(1f)
-                                .clickable { fullScreenImage = photoRes },
+                                .clickable { viewModel.onImageClick(photoRes) },
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -118,7 +112,7 @@ fun GalleryScreen(onBack: () -> Unit) {
                 ) {
                     items(albums) { album ->
                         Column(
-                            modifier = Modifier.clickable { fullScreenImage = album.coverImage }
+                            modifier = Modifier.clickable { viewModel.onImageClick(album.coverImage) }
                         ) {
                             Image(
                                 painter = painterResource(id = album.coverImage),
@@ -137,23 +131,23 @@ fun GalleryScreen(onBack: () -> Unit) {
             }
         }
 
-        if (fullScreenImage != null) {
+        if (viewModel.fullScreenImage != null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black)
-                    .clickable { fullScreenImage = null },
+                    .clickable { viewModel.dismissFullScreen() },
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = fullScreenImage!!),
+                    painter = painterResource(id = viewModel.fullScreenImage!!),
                     contentDescription = stringResource(R.string.gallery_full_screen_desc),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
 
                 IconButton(
-                    onClick = { fullScreenImage = null },
+                    onClick = { viewModel.dismissFullScreen() },
                     modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
                 ) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.close), tint = Color.White)

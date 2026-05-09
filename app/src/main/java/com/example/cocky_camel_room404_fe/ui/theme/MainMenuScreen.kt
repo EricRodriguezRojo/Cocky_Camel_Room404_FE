@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun MainMenuScreen(
@@ -26,10 +27,12 @@ fun MainMenuScreen(
     onContinue: () -> Unit,
     onSettings: () -> Unit,
     onRanking: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    viewModel: MainMenuViewModel = viewModel()
 ) {
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { visible = true }
+    LaunchedEffect(Unit) {
+        viewModel.onAppear()
+    }
 
     val context = LocalContext.current
 
@@ -42,7 +45,7 @@ fun MainMenuScreen(
         )
 
         AnimatedVisibility(
-            visible = visible,
+            visible = viewModel.isVisible,
             enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(initialOffsetY = { 50 })
         ) {
             Column(
@@ -88,8 +91,7 @@ fun MainMenuScreen(
 
                         OutlinedButton(
                             onClick = {
-                                SessionManager.logout(context)
-                                onLogout()
+                                viewModel.logout(context, onLogout)
                             },
                             modifier = Modifier.fillMaxWidth().height(45.dp),
                             shape = MaterialTheme.shapes.extraSmall,

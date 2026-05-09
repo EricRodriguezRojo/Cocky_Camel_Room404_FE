@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -20,41 +21,38 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class Note(val title: String, val content: String, val date: String)
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotesScreen(onBack: () -> Unit) {
+fun NotesScreen(
+    onBack: () -> Unit,
+    viewModel: NotesViewModel = viewModel()
+) {
     val context = LocalContext.current
 
-    val notes = listOf(
-        Note(
-            title = stringResource(R.string.note_shopping_title),
-            content = stringResource(R.string.note_shopping_content),
-            date = stringResource(R.string.mail_date_today_time)
-        ),
-        Note(
-            title = stringResource(R.string.note_tfg_title),
-            content = stringResource(R.string.note_tfg_content),
-            date = stringResource(R.string.mail_date_yesterday_time)
-        ),
-        Note(
-            title = stringResource(R.string.note_dontdelete_title),
-            content = stringResource(R.string.note_dontdelete_content),
-            date = "10 May, 23:15"
-        ),
-        Note(
-            title = stringResource(R.string.note_gym_title),
-            content = stringResource(R.string.note_gym_content),
-            date = "01 May, 08:00"
-        ),
-        Note(
-            title = stringResource(R.string.note_passwords_title),
-            content = stringResource(R.string.note_passwords_content),
-            date = "15 Abr, 12:45"
+    val shoppingTitle = stringResource(R.string.note_shopping_title)
+    val shoppingContent = stringResource(R.string.note_shopping_content)
+    val shoppingDate = stringResource(R.string.mail_date_today_time)
+    val tfgTitle = stringResource(R.string.note_tfg_title)
+    val tfgContent = stringResource(R.string.note_tfg_content)
+    val tfgDate = stringResource(R.string.mail_date_yesterday_time)
+    val dontDeleteTitle = stringResource(R.string.note_dontdelete_title)
+    val dontDeleteContent = stringResource(R.string.note_dontdelete_content)
+    val gymTitle = stringResource(R.string.note_gym_title)
+    val gymContent = stringResource(R.string.note_gym_content)
+    val passwordsTitle = stringResource(R.string.note_passwords_title)
+    val passwordsContent = stringResource(R.string.note_passwords_content)
+
+    LaunchedEffect(Unit) {
+        viewModel.loadNotes(
+            shoppingTitle, shoppingContent, shoppingDate,
+            tfgTitle, tfgContent, tfgDate,
+            dontDeleteTitle, dontDeleteContent,
+            gymTitle, gymContent,
+            passwordsTitle, passwordsContent
         )
-    )
+    }
 
     Scaffold(
         topBar = {
@@ -90,7 +88,7 @@ fun NotesScreen(onBack: () -> Unit) {
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            items(notes) { note ->
+            items(viewModel.notes) { note ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

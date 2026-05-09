@@ -1,6 +1,5 @@
 package com.example.cocky_camel_room404_fe
 
-import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,17 +27,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
-data class Chat(val id: String, val name: String, val lastMessage: String, val time: String)
-data class Message(val text: String, val isFromMe: Boolean)
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessagesScreen(onBack: () -> Unit) {
+fun MessagesScreen(
+    onBack: () -> Unit,
+    viewModel: MessagesViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     val chats = listOf(
         Chat("1", stringResource(R.string.chat_unknown_name), stringResource(R.string.chat_unknown_last_msg), "11:45"),
@@ -47,23 +44,17 @@ fun MessagesScreen(onBack: () -> Unit) {
         Chat("4", "Vodafone", stringResource(R.string.chat_vodafone_last_msg), stringResource(R.string.chat_date_monday))
     )
 
-    var currentChat by remember { mutableStateOf<Chat?>(null) }
-    var chatMessages by remember { mutableStateOf(listOf<Message>()) }
-    var inputText by remember { mutableStateOf("") }
-
-    var isGlitching by remember { mutableStateOf(false) }
-    var showGlitchOverlay by remember { mutableStateOf(false) }
-    var showSystemMessage by remember { mutableStateOf(false) }
-
     val msgUnknown1 = stringResource(R.string.chat_unknown_msg_1)
     val msgUnknown2 = stringResource(R.string.chat_unknown_msg_2)
     val msgUnknown3 = stringResource(R.string.chat_unknown_msg_3)
     val msgUnknown4 = stringResource(R.string.chat_unknown_msg_4)
+    
+    val unknownMsgs = remember { listOf(msgUnknown4, msgUnknown3, msgUnknown2, msgUnknown1) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "")
     val offsetX by infiniteTransition.animateFloat(
-        initialValue = if (isGlitching) -15f else 0f,
-        targetValue = if (isGlitching) 15f else 0f,
+        initialValue = if (viewModel.isGlitching) -15f else 0f,
+        targetValue = if (viewModel.isGlitching) 15f else 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(50, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -71,20 +62,7 @@ fun MessagesScreen(onBack: () -> Unit) {
         label = ""
     )
 
-    val colorOverlay = if (showGlitchOverlay) Color.Red.copy(alpha = 0.4f) else Color.Transparent
-
-    LaunchedEffect(currentChat) {
-        if (currentChat?.id == "1") {
-            chatMessages = listOf(
-                Message(msgUnknown4, false),
-                Message(msgUnknown3, false),
-                Message(msgUnknown2, false),
-                Message(msgUnknown1, false)
-            )
-        } else if (currentChat != null) {
-            chatMessages = listOf(Message(currentChat!!.lastMessage, false))
-        }
-    }
+    val colorOverlay = if (viewModel.showGlitchOverlay) Color.Red.copy(alpha = 0.4f) else Color.Transparent
 
     Box(
         modifier = Modifier
@@ -92,7 +70,7 @@ fun MessagesScreen(onBack: () -> Unit) {
             .background(Color(0xFF121212))
             .graphicsLayer { translationX = offsetX }
     ) {
-        if (currentChat == null) {
+        if (viewModel.currentChat == null) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
                     title = { Text(stringResource(R.string.messages_title), color = Color.White, fontWeight = FontWeight.Bold) },
@@ -109,7 +87,7 @@ fun MessagesScreen(onBack: () -> Unit) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { currentChat = chat }
+                                .clickable { viewModel.selectChat(chat, unknownMsgs) }
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -147,9 +125,9 @@ fun MessagesScreen(onBack: () -> Unit) {
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
-                    title = { Text(currentChat!!.name, color = Color.White, fontSize = 18.sp) },
+                    title = { Text(viewModel.currentChat!!.name, color = Color.White, fontSize = 18.sp) },
                     navigationIcon = {
-                        IconButton(onClick = { currentChat = null }) {
+                        IconButton(onClick = { viewModel.selectChat(null, emptyList()) }) {
                             Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                         }
                     },
@@ -162,7 +140,7 @@ fun MessagesScreen(onBack: () -> Unit) {
                         .padding(horizontal = 16.dp),
                     reverseLayout = true
                 ) {
-                    items(chatMessages.reversed()) { msg ->
+                    items(viewModel.chatMessages.reversed()) { msg ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -189,8 +167,8 @@ fun MessagesScreen(onBack: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextField(
-                        value = inputText,
-                        onValueChange = { inputText = it },
+                        value = viewModel.inputText,
+                        onValueChange = { viewModel.inputText = it },
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(24.dp)),
@@ -206,43 +184,7 @@ fun MessagesScreen(onBack: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     IconButton(
-                        onClick = {
-                            if (inputText.isNotBlank()) {
-                                val textSent = inputText.trim()
-                                chatMessages = chatMessages + Message(textSent, true)
-                                inputText = ""
-
-                                if (currentChat?.id == "1" && textSent.equals("malware", ignoreCase = true)) {
-                                    val segundosTardados = TimeTracker.getSecondsElapsedAndReset()
-
-                                    coroutineScope.launch {
-                                        try {
-                                            val token = SessionManager.getToken(context)
-                                            if (token != null) {
-                                                RetrofitClient.instance.triggerMalware("Bearer $token")
-                                                RetrofitClient.instance.completePuzzle(
-                                                    token = "Bearer $token",
-                                                    puzzleName = "Malware Enigma",
-                                                    body = mapOf("timeSeconds" to segundosTardados)
-                                                )
-                                            }
-                                        } catch (e: Exception) { }
-                                    }
-
-                                    coroutineScope.launch {
-                                        isGlitching = true
-                                        showGlitchOverlay = true
-                                        delay(800)
-                                        isGlitching = false
-                                        showGlitchOverlay = false
-
-                                        showSystemMessage = true
-                                        delay(5000)
-                                        showSystemMessage = false
-                                    }
-                                }
-                            }
-                        },
+                        onClick = { viewModel.sendMessage(context) },
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
@@ -256,7 +198,7 @@ fun MessagesScreen(onBack: () -> Unit) {
 
         Box(modifier = Modifier.fillMaxSize().background(colorOverlay))
 
-        if (showSystemMessage) {
+        if (viewModel.showSystemMessage) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center

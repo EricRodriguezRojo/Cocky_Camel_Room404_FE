@@ -20,23 +20,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
-
-data class Email(
-    val sender: String,
-    val subject: String,
-    val body: String,
-    val date: String,
-    val isRead: Boolean = true
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MailScreen(onBack: () -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
-    var dbEmails by remember { mutableStateOf<List<Email>>(emptyList()) }
-    var selectedEmail by remember { mutableStateOf<Email?>(null) }
-
+fun MailScreen(
+    onBack: () -> Unit,
+    viewModel: MailViewModel = viewModel()
+) {
     val systemSubject = stringResource(R.string.mail_system_subject)
     val todayText = stringResource(R.string.mail_date_today)
 
@@ -49,30 +40,12 @@ fun MailScreen(onBack: () -> Unit) {
     )
 
     LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            try {
-                val response = RetrofitClient.instance.getEmails()
-                if (response.isSuccessful) {
-                    val dtos = response.body() ?: emptyList()
-                    dbEmails = dtos.map { dto ->
-                        Email(
-                            sender = dto.sender,
-                            subject = systemSubject,
-                            body = dto.bodyText,
-                            date = todayText,
-                            isRead = false
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        viewModel.loadEmails(systemSubject, todayText)
     }
 
-    val allEmails = staticEmails + dbEmails
+    val allEmails = staticEmails + viewModel.dbEmails
 
-    if (selectedEmail != null) {
+    if (viewModel.selectedEmail != null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,14 +54,14 @@ fun MailScreen(onBack: () -> Unit) {
             TopAppBar(
                 title = { Text("", color = Color.White) },
                 navigationIcon = {
-                    IconButton(onClick = { selectedEmail = null }) {
+                    IconButton(onClick = { viewModel.selectEmail(null) }) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
             )
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = selectedEmail!!.subject, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(text = viewModel.selectedEmail!!.subject, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
@@ -99,14 +72,14 @@ fun MailScreen(onBack: () -> Unit) {
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        Text(text = selectedEmail!!.sender, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        Text(text = viewModel.selectedEmail!!.sender, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                         Text(text = stringResource(R.string.mail_to_me), color = Color.Gray, fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    Text(text = selectedEmail!!.date, color = Color.Gray, fontSize = 14.sp)
+                    Text(text = viewModel.selectedEmail!!.date, color = Color.Gray, fontSize = 14.sp)
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-                Text(text = selectedEmail!!.body, color = Color.LightGray, fontSize = 16.sp, lineHeight = 24.sp)
+                Text(text = viewModel.selectedEmail!!.body, color = Color.LightGray, fontSize = 16.sp, lineHeight = 24.sp)
             }
         }
     } else {
@@ -129,7 +102,7 @@ fun MailScreen(onBack: () -> Unit) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { selectedEmail = email }
+                            .clickable { viewModel.selectEmail(email) }
                             .padding(16.dp),
                         verticalAlignment = Alignment.Top
                     ) {

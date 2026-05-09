@@ -25,25 +25,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    viewModel: LoginViewModel = viewModel()
 ) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
 
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    var isLoading by remember { mutableStateOf(false) }
 
     val gso = remember {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -59,43 +55,13 @@ fun LoginScreen(
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)
-            val idToken = account.idToken
-
-            if (idToken != null) {
-                coroutineScope.launch {
-                    isLoading = true
-                    try {
-                        val response = RetrofitClient.instance.googleLogin(mapOf("idToken" to idToken))
-                        if (response.isSuccessful) {
-                            val loginData = response.body()
-                            loginData?.token?.let { token ->
-                                SessionManager.saveToken(context, token)
-                            }
-                            val userRole = loginData?.role ?: "User"
-                            SessionManager.saveRole(context, userRole)
-
-                            try {
-                                val email = account.email
-                                if (!email.isNullOrBlank()) {
-                                    val userResp = RetrofitClient.instance.getUser(email)
-                                    if (userResp.isSuccessful) {
-                                        val user = userResp.body()
-                                        user?.nickname?.let { SessionManager.saveNickname(context, it) }
-                                    }
-                                }
-                            } catch (e: Exception) {}
-
-                            Toast.makeText(context, loginData?.message ?: context.getString(R.string.login_access_granted), Toast.LENGTH_SHORT).show()
-                            onLoginSuccess()
-                        } else {
-                            Toast.makeText(context, context.getString(R.string.login_google_error), Toast.LENGTH_SHORT).show()
-                        }
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "${context.getString(R.string.login_network_error)}: ${e.message}", Toast.LENGTH_SHORT).show()
-                    } finally {
-                        isLoading = false
-                    }
-                }
+            if (account != null) {
+                viewModel.onGoogleLogin(
+                    context = context,
+                    account = account,
+                    onLoginSuccess = onLoginSuccess,
+                    onToast = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                )
             }
         } catch (e: ApiException) {
             Toast.makeText(context, context.getString(R.string.login_google_canceled), Toast.LENGTH_SHORT).show()
@@ -143,62 +109,30 @@ fun LoginScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         MinimalistField(
-                            value = username,
-                            onValueChange = { username = it },
+                            value = viewModel.email,
+                            onValueChange = { viewModel.email = it },
                             label = stringResource(R.string.login_email_label)
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         MinimalistField(
-                            value = password,
-                            onValueChange = { password = it },
+                            value = viewModel.password,
+                            onValueChange = { viewModel.password = it },
                             label = stringResource(R.string.login_password_label),
                             isPassword = true
                         )
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        if (isLoading) {
+                        if (viewModel.isLoading) {
                             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         } else {
                             InteractionButton(
                                 text = stringResource(R.string.login_access_button),
                                 onClick = {
-                                    if (username.isBlank() || password.isBlank()) {
-                                        Toast.makeText(context, context.getString(R.string.login_missing_credentials), Toast.LENGTH_SHORT).show()
-                                        return@InteractionButton
-                                    }
-
-                                    coroutineScope.launch {
-                                        isLoading = true
-                                        try {
-                                            val response = RetrofitClient.instance.login(username, password)
-
-                                            if (response.isSuccessful) {
-                                                val loginData = response.body()
-                                                loginData?.token?.let { token ->
-                                                    SessionManager.saveToken(context, token)
-                                                }
-                                                val userRole = loginData?.role ?: "User"
-                                                SessionManager.saveRole(context, userRole)
-
-                                                try {
-                                                    val userResp = RetrofitClient.instance.getUser(username)
-                                                    if (userResp.isSuccessful) {
-                                                        val user = userResp.body()
-                                                        user?.nickname?.let { SessionManager.saveNickname(context, it) }
-                                                    }
-                                                } catch (e: Exception) {}
-
-                                                Toast.makeText(context, loginData?.message ?: context.getString(R.string.login_connected), Toast.LENGTH_SHORT).show()
-                                                onLoginSuccess()
-                                            } else {
-                                                Toast.makeText(context, context.getString(R.string.login_invalid_credentials), Toast.LENGTH_SHORT).show()
-                                            }
-                                        } catch (e: Exception) {
-                                            Toast.makeText(context, "${context.getString(R.string.login_critical_error)}: ${e.message}", Toast.LENGTH_SHORT).show()
-                                        } finally {
-                                            isLoading = false
-                                        }
-                                    }
+                                    viewModel.onLoginClick(
+                                        context = context,
+                                        onLoginSuccess = onLoginSuccess,
+                                        onToast = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                    )
                                 }
                             )
 
@@ -279,7 +213,7 @@ fun MinimalistField(
 fun InteractionButton(text: String, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f)
+    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "")
 
     Button(
         onClick = onClick,
