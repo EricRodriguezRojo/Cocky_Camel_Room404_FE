@@ -1,9 +1,5 @@
 package com.example.cocky_camel_room404_fe
 
-import android.app.Activity
-import android.content.Context
-import android.media.AudioManager
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,17 +18,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(
+    onBack: () -> Unit,
+    viewModel: SettingsViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val audioManager = remember { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
-
-    val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-    var currentVolume by remember {
-        mutableFloatStateOf(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat())
+    
+    LaunchedEffect(Unit) {
+        viewModel.initVolume(context)
     }
 
     Column(
@@ -60,9 +57,9 @@ fun SettingsScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                LanguageButton("ca", stringResource(R.string.lang_ca), Modifier.weight(1f))
-                LanguageButton("es", stringResource(R.string.lang_es), Modifier.weight(1f))
-                LanguageButton("en", stringResource(R.string.lang_en), Modifier.weight(1f))
+                LanguageButton(viewModel, "ca", stringResource(R.string.lang_ca), Modifier.weight(1f))
+                LanguageButton(viewModel, "es", stringResource(R.string.lang_es), Modifier.weight(1f))
+                LanguageButton(viewModel, "en", stringResource(R.string.lang_en), Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -78,12 +75,11 @@ fun SettingsScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Slider(
-                value = currentVolume,
+                value = viewModel.currentVolume,
                 onValueChange = {
-                    currentVolume = it
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, it.toInt(), 0)
+                    viewModel.setVolume(context, it)
                 },
-                valueRange = 0f..maxVolume.toFloat(),
+                valueRange = 0f..viewModel.maxVolume.coerceAtLeast(1f),
                 colors = SliderDefaults.colors(
                     thumbColor = Color(0xFF03A9F4),
                     activeTrackColor = Color(0xFF03A9F4)
@@ -94,12 +90,10 @@ fun SettingsScreen(onBack: () -> Unit) {
 }
 
 @Composable
-fun LanguageButton(langCode: String, label: String, modifier: Modifier) {
-    val context = LocalContext.current
+fun LanguageButton(viewModel: SettingsViewModel, langCode: String, label: String, modifier: Modifier) {
     OutlinedButton(
         onClick = {
-            val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(langCode)
-            AppCompatDelegate.setApplicationLocales(appLocale)
+            viewModel.setLanguage(langCode)
         },
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),

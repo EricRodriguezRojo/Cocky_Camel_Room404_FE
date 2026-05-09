@@ -7,17 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -27,39 +17,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.BatteryFull
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.GridOn
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.NetworkCell
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.PhotoAlbum
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,10 +39,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.random.Random
 
 data class FakeApp(
+    val nameRes: Int,
     val name: String,
     val icon: ImageVector,
     val color: Color,
@@ -92,81 +53,63 @@ data class FakeApp(
 
 fun playIconClickSound(context: Context) {
     val isGlitch = Random.nextFloat() < 0.20f
-
-    val soundResId = if (isGlitch) {
-        R.raw.beeper_hak
-    } else {
-        R.raw.beeper_normal
-    }
-
+    val soundResId = if (isGlitch) R.raw.beeper_hak else R.raw.beeper_normal
     MediaPlayer.create(context, soundResId)?.apply {
-        setOnCompletionListener {
-            it.release()
-        }
+        setOnCompletionListener { it.release() }
         start()
     }
 }
 
 @Composable
 fun FakeOSScreen(
-    onAppOpened: (String) -> Unit
+    onAppOpened: (Int) -> Unit,
+    viewModel: FakeOSViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    var isGlitching by remember { mutableStateOf(false) }
-    var showExitConfirm by remember { mutableStateOf(false) }
 
     BackHandler(enabled = true) {
         Toast.makeText(context, context.getString(R.string.fakeos_back_toast), Toast.LENGTH_SHORT).show()
     }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(Random.nextLong(5000, 15000))
-            isGlitching = true
-            delay(Random.nextLong(300, 800))
-            isGlitching = false
-        }
-    }
-
     val desktopApps = listOf(
-        FakeApp(stringResource(R.string.app_gallery), Icons.Filled.PhotoAlbum, Color(0xFF9C27B0), true),
-        FakeApp(stringResource(R.string.app_mail), Icons.Filled.Email, Color(0xFFD32F2F), true, true),
-        FakeApp(stringResource(R.string.app_notes), Icons.Filled.Edit, Color(0xFFFFC107), true),
-        FakeApp(stringResource(R.string.app_settings), Icons.Filled.Settings, Color(0xFF607D8B), true),
-        FakeApp(stringResource(R.string.app_calculator), Icons.Filled.Calculate, Color(0xFF455A64), true),
-        FakeApp(stringResource(R.string.app_calendar), Icons.Filled.DateRange, Color(0xFF03A9F4), true),
-        FakeApp(stringResource(R.string.app_clock), Icons.Filled.AccessTime, Color(0xFF00BCD4), true),
-        FakeApp(stringResource(R.string.app_sudoku), Icons.Filled.GridOn, Color(0xFF8BC34A), true),
-        FakeApp(stringResource(R.string.app_music), Icons.Filled.MusicNote, Color(0xFFE91E63), true),
-        FakeApp(stringResource(R.string.app_internet), Icons.Filled.Public, Color(0xFF2196F3), true),
-        FakeApp(stringResource(R.string.app_playstore), Icons.Filled.PlayArrow, Color(0xFF4CAF50), true),
-        FakeApp(stringResource(R.string.app_weather), Icons.Filled.WbSunny, Color(0xFFFFEB3B), true),
-        FakeApp(stringResource(R.string.app_files), Icons.Filled.Folder, Color(0xFFFF9800), true),
-        FakeApp(stringResource(R.string.app_maps), Icons.Filled.LocationOn, Color(0xFF4CAF50), true),
-        FakeApp(stringResource(R.string.app_system_update), Icons.Filled.Warning, Color(0xFFFF0000), true, true),
-        FakeApp(stringResource(R.string.app_exit), Icons.Filled.ExitToApp, Color(0xFF18D234), true)
+        FakeApp(R.string.app_gallery, stringResource(R.string.app_gallery), Icons.Filled.PhotoAlbum, Color(0xFF9C27B0), true),
+        FakeApp(R.string.app_mail, stringResource(R.string.app_mail), Icons.Filled.Email, Color(0xFFD32F2F), true, true),
+        FakeApp(R.string.app_notes, stringResource(R.string.app_notes), Icons.Filled.Edit, Color(0xFFFFC107), true),
+        FakeApp(R.string.app_settings, stringResource(R.string.app_settings), Icons.Filled.Settings, Color(0xFF607D8B), true),
+        FakeApp(R.string.app_calculator, stringResource(R.string.app_calculator), Icons.Filled.Calculate, Color(0xFF455A64), true),
+        FakeApp(R.string.app_calendar, stringResource(R.string.app_calendar), Icons.Filled.DateRange, Color(0xFF03A9F4), true),
+        FakeApp(R.string.app_clock, stringResource(R.string.app_clock), Icons.Filled.AccessTime, Color(0xFF00BCD4), true),
+        FakeApp(R.string.app_sudoku, stringResource(R.string.app_sudoku), Icons.Filled.GridOn, Color(0xFF8BC34A), true),
+        FakeApp(R.string.app_music, stringResource(R.string.app_music), Icons.Filled.MusicNote, Color(0xFFE91E63), true),
+        FakeApp(R.string.app_internet, stringResource(R.string.app_internet), Icons.Filled.Public, Color(0xFF2196F3), true),
+        FakeApp(R.string.app_playstore, stringResource(R.string.app_playstore), Icons.Filled.PlayArrow, Color(0xFF4CAF50), true),
+        FakeApp(R.string.app_weather, stringResource(R.string.app_weather), Icons.Filled.WbSunny, Color(0xFFFFEB3B), true),
+        FakeApp(R.string.app_files, stringResource(R.string.app_files), Icons.Filled.Folder, Color(0xFFFF9800), true),
+        FakeApp(R.string.app_maps, stringResource(R.string.app_maps), Icons.Filled.LocationOn, Color(0xFF4CAF50), true),
+        FakeApp(R.string.app_system_update, stringResource(R.string.app_system_update), Icons.Filled.Warning, Color(0xFFFF0000), true, true),
+        FakeApp(R.string.app_exit, stringResource(R.string.app_exit), Icons.Filled.ExitToApp, Color(0xFF18D234), true)
     )
 
     val dockApps = listOf(
-        FakeApp(stringResource(R.string.app_phone), Icons.Filled.Phone, Color(0xFF4CAF50), true),
-        FakeApp(stringResource(R.string.app_messages), Icons.AutoMirrored.Filled.Message, Color(0xFF2196F3), true),
-        FakeApp(stringResource(R.string.app_camera), Icons.Filled.CameraAlt, Color(0xFF333333), true)
+        FakeApp(R.string.app_phone, stringResource(R.string.app_phone), Icons.Filled.Phone, Color(0xFF4CAF50), true),
+        FakeApp(R.string.app_messages, stringResource(R.string.app_messages), Icons.AutoMirrored.Filled.Message, Color(0xFF2196F3), true),
+        FakeApp(R.string.app_camera, stringResource(R.string.app_camera), Icons.Filled.CameraAlt, Color(0xFF333333), true)
     )
 
-    if (showExitConfirm) {
+    if (viewModel.showExitConfirm) {
         AlertDialog(
-            onDismissRequest = { showExitConfirm = false },
+            onDismissRequest = { viewModel.dismissExitConfirm() },
             title = { Text(stringResource(R.string.confirm_exit_title)) },
             confirmButton = {
                 TextButton(onClick = {
-                    showExitConfirm = false
-                    onAppOpened("EXIT")
+                    viewModel.dismissExitConfirm()
+                    onAppOpened(R.string.app_exit)
                 }) {
                     Text(stringResource(R.string.accept), color = Color.Red)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showExitConfirm = false }) {
+                TextButton(onClick = { viewModel.dismissExitConfirm() }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -176,7 +119,7 @@ fun FakeOSScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .glitchEffect(isGlitching)
+            .glitchEffect(viewModel.isGlitching)
     ) {
         Image(
             painter = painterResource(id = R.drawable.fondo_fakeos),
@@ -185,15 +128,10 @@ fun FakeOSScreen(
             contentScale = ContentScale.Crop
         )
 
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             FakeStatusBar(modifier = Modifier.padding(top = 12.dp))
-
             Spacer(modifier = Modifier.height(24.dp))
-
-            FakeGoogleSearchBar()
-
+            FakeGoogleSearchBar(viewModel)
             Spacer(modifier = Modifier.height(24.dp))
 
             LazyVerticalGrid(
@@ -208,11 +146,10 @@ fun FakeOSScreen(
                 items(desktopApps) { app ->
                     AppIcon(app = app) {
                         playIconClickSound(context)
-
-                        if (app.name == context.getString(R.string.app_exit)) {
-                            showExitConfirm = true
+                        if (app.nameRes == R.string.app_exit) {
+                            viewModel.openExitConfirm()
                         } else if (app.isFunctional) {
-                            onAppOpened(app.name)
+                            onAppOpened(app.nameRes)
                         } else {
                             Toast.makeText(context, "${app.name} ${context.getString(R.string.app_not_responding)}", Toast.LENGTH_SHORT).show()
                         }
@@ -230,9 +167,8 @@ fun FakeOSScreen(
                 dockApps.forEach { app ->
                     AppIcon(app = app, showLabel = false) {
                         playIconClickSound(context)
-
                         if (app.isFunctional) {
-                            onAppOpened(app.name)
+                            onAppOpened(app.nameRes)
                         } else {
                             Toast.makeText(context, "${context.getString(R.string.error_opening_app)} ${app.name}", Toast.LENGTH_SHORT).show()
                         }
@@ -258,10 +194,9 @@ fun FakeOSScreen(
 }
 
 @Composable
-fun FakeGoogleSearchBar() {
+fun FakeGoogleSearchBar(viewModel: FakeOSViewModel) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    var searchQuery by remember { mutableStateOf("") }
 
     Row(
         modifier = Modifier
@@ -278,8 +213,8 @@ fun FakeGoogleSearchBar() {
             contentDescription = null,
             tint = Color.White,
             modifier = Modifier.clickable {
-                if (searchQuery.isNotEmpty()) {
-                    Toast.makeText(context, context.getString(R.string.network_connection_error), Toast.LENGTH_SHORT).show()
+                viewModel.onSearch {
+                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                     focusManager.clearFocus()
                 }
             }
@@ -287,21 +222,23 @@ fun FakeGoogleSearchBar() {
         Spacer(modifier = Modifier.width(12.dp))
 
         BasicTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
+            value = viewModel.searchQuery,
+            onValueChange = { viewModel.searchQuery = it },
             modifier = Modifier.weight(1f),
             textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
                 onSearch = {
-                    Toast.makeText(context, context.getString(R.string.network_connection_error), Toast.LENGTH_SHORT).show()
-                    focusManager.clearFocus()
+                    viewModel.onSearch {
+                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        focusManager.clearFocus()
+                    }
                 }
             ),
             decorationBox = { innerTextField ->
                 Box(contentAlignment = Alignment.CenterStart) {
-                    if (searchQuery.isEmpty()) {
+                    if (viewModel.searchQuery.isEmpty()) {
                         Text(
                             text = stringResource(R.string.search_placeholder),
                             color = Color.LightGray,

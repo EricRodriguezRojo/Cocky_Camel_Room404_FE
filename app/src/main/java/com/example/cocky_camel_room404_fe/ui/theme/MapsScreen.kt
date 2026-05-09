@@ -1,8 +1,6 @@
 package com.example.cocky_camel_room404_fe
 
 import android.Manifest
-import android.content.pm.PackageManager
-import android.location.Location
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,13 +21,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -37,26 +31,18 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapsScreen(onBack: () -> Unit) {
+fun MapsScreen(
+    onBack: () -> Unit,
+    viewModel: MapsViewModel = viewModel()
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    var hasLocationPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    var currentLocation by remember { mutableStateOf<Location?>(null) }
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
-    var hasCenteredCamera by remember { mutableStateOf(false) }
-    var errorModeActive by remember { mutableStateOf(false) }
 
     val userLocationLabel = stringResource(R.string.maps_user_location)
     val routeErrorMsg = stringResource(R.string.maps_route_error)
@@ -64,57 +50,30 @@ fun MapsScreen(onBack: () -> Unit) {
     LaunchedEffect(Unit) {
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", 0))
         Configuration.getInstance().userAgentValue = context.packageName
-    }
-
-    fun requestCurrentLocation() {
-        if (!hasLocationPermission) return
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return
-
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    currentLocation = location
-                } else {
-                    val tokenSource = CancellationTokenSource()
-                    fusedLocationClient
-                        .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token)
-                        .addOnSuccessListener { freshLocation ->
-                            if (freshLocation != null) {
-                                currentLocation = freshLocation
-                            }
-                        }
-                }
-            }
+        viewModel.updatePermissionStatus(context)
     }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
-        hasLocationPermission = granted
+        viewModel.setPermissionGranted(granted)
         if (granted) {
-            requestCurrentLocation()
+            viewModel.requestCurrentLocation(context, fusedLocationClient)
         }
     }
 
-    LaunchedEffect(hasLocationPermission) {
-        if (hasLocationPermission) {
-            requestCurrentLocation()
+    LaunchedEffect(viewModel.hasLocationPermission) {
+        if (viewModel.hasLocationPermission) {
+            viewModel.requestCurrentLocation(context, fusedLocationClient)
         } else {
             locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    LaunchedEffect(errorModeActive) {
-        if (errorModeActive) {
-            delay(2200)
-            errorModeActive = false
-        }
-    }
-
-    val statusBarBg = if (errorModeActive) Color(0xFF250000) else Color.Black
-    val searchBarBg = if (errorModeActive) Color(0xCC330000) else Color(0xD92A2A2A)
-    val panelBg = if (errorModeActive) Color(0xFF120000) else Color(0xEE1A1A1A)
-    val directionsButtonBg = if (errorModeActive) Color(0xFF8B0000) else Color(0xFF03A9F4)
+    val statusBarBg = if (viewModel.errorModeActive) Color(0xFF250000) else Color.Black
+    val searchBarBg = if (viewModel.errorModeActive) Color(0xCC330000) else Color(0xD92A2A2A)
+    val panelBg = if (viewModel.errorModeActive) Color(0xFF120000) else Color(0xEE1A1A1A)
+    val directionsButtonBg = if (viewModel.errorModeActive) Color(0xFF8B0000) else Color(0xFF03A9F4)
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
         AndroidView(
@@ -129,7 +88,7 @@ fun MapsScreen(onBack: () -> Unit) {
                 }
             },
             update = { mapView ->
-                val location = currentLocation
+                val location = viewModel.currentLocation
                 if (location != null) {
                     val userPoint = GeoPoint(location.latitude, location.longitude)
 
@@ -145,10 +104,10 @@ fun MapsScreen(onBack: () -> Unit) {
                     }
                     mapView.overlays.add(marker)
 
-                    if (!hasCenteredCamera) {
+                    if (!viewModel.hasCenteredCamera) {
                         mapView.controller.setZoom(17.0)
                         mapView.controller.animateTo(userPoint)
-                        hasCenteredCamera = true
+                        viewModel.hasCenteredCamera = true
                     }
                     mapView.invalidate()
                 }
@@ -195,7 +154,7 @@ fun MapsScreen(onBack: () -> Unit) {
             }
         }
 
-        if (!hasLocationPermission) {
+        if (!viewModel.hasLocationPermission) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color(0xCC2A2A2A)),
                 modifier = Modifier
@@ -213,9 +172,9 @@ fun MapsScreen(onBack: () -> Unit) {
 
         FloatingActionButton(
             onClick = {
-                if (hasLocationPermission) {
-                    hasCenteredCamera = false
-                    requestCurrentLocation()
+                if (viewModel.hasLocationPermission) {
+                    viewModel.hasCenteredCamera = false
+                    viewModel.requestCurrentLocation(context, fusedLocationClient)
                 } else {
                     locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                 }
@@ -239,7 +198,7 @@ fun MapsScreen(onBack: () -> Unit) {
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(stringResource(R.string.maps_last_location_label), color = Color.Gray, fontSize = 12.sp)
                 Text(
-                    text = currentLocation?.let { "Lat ${"%.5f".format(it.latitude)}, Lon ${"%.5f".format(it.longitude)}" }
+                    text = viewModel.currentLocation?.let { "Lat ${"%.5f".format(it.latitude)}, Lon ${"%.5f".format(it.longitude)}" }
                         ?: stringResource(R.string.maps_default_address),
                     color = Color.White,
                     fontSize = 18.sp,
@@ -248,7 +207,7 @@ fun MapsScreen(onBack: () -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        errorModeActive = true
+                        viewModel.triggerErrorMode()
                         Toast.makeText(context, routeErrorMsg, Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier.fillMaxWidth(),
