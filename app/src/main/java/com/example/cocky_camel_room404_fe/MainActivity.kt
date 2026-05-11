@@ -50,8 +50,9 @@ class MainActivity : AppCompatActivity() {
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     NavHost(navController = navController, startDestination = startDestination) {
-                        composable("login") { LoginScreen(onLoginSuccess = { navController.navigate("main_menu") { popUpTo("login") { inclusive = true } } }, onNavigateToRegister = { navController.navigate("register") }) }
+                        composable("login") { LoginScreen(onLoginSuccess = { navController.navigate("main_menu") { popUpTo("login") { inclusive = true } } }, onNavigateToRegister = { navController.navigate("register") }, onNavigateToForgotPassword = { navController.navigate("forgot_password") }) }
                         composable("register") { RegisterScreen(onRegisterSuccess = { navController.navigate("login") }, onNavigateToLogin = { navController.navigate("login") }) }
+                        composable("forgot_password") { ForgotPasswordScreen(onNavigateToLogin = { navController.popBackStack() }) }
 
                         composable("main_menu") {
                             MainMenuScreen(

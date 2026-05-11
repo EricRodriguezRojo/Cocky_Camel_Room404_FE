@@ -23,6 +23,7 @@
     <string name="login_invalid_credentials">Credenciales incorrectas</string>
     <string name="login_critical_error">Error crítico</string>
     <string name="login_register_link">CREAR NUEVAS CREDENCIALES</string>
+    <string name="login_forgot_password_link">¿OLVIDASTE LA CLAVE?</string>
     <string name="login_or_divider">O</string>
     <string name="gallery_instagram">Instagram</string>
     <string name="gallery_whatsapp">WhatsApp</string>
@@ -34,6 +35,15 @@
     <string name="register_success">Nodo creado correctamente</string>
     <string name="register_email_exists">Error: El email ya existe</string>
     <string name="register_login_link">¿YA ESTÁS REGISTRADO? LOGIN</string>
+
+    <string name="forgot_password_title">RECUPERAR CONTRASEÑA</string>
+    <string name="forgot_password_email_label">EMAIL DE RECUPERACIÓN</string>
+    <string name="forgot_password_send_button">ENVIAR CORREO</string>
+    <string name="forgot_password_back_link">VOLVER AL LOGIN</string>
+    <string name="forgot_password_required_email">El email es obligatorio</string>
+    <string name="forgot_password_invalid_email">Introduce un email válido</string>
+    <string name="forgot_password_success">Si el correo existe, recibirás un enlace de recuperación</string>
+    <string name="forgot_password_error">No se ha podido enviar el correo de recuperación</string>
 
     <string name="menu_new_game">NUEVA PARTIDA</string>
     <string name="menu_continue">CONTINUAR</string>

@@ -27,6 +27,10 @@ data class User(
     val isPremium: Boolean = false
 )
 
+data class ForgotPasswordRequest(
+    val email: String
+)
+
 data class FakeEmailDto(
     val id: Int? = null,
     val sender: String,
@@ -51,6 +55,9 @@ interface Room404Api {
 
     @POST("api/user/google-login")
     suspend fun googleLogin(@Body data: Map<String, String>): Response<LoginResponse>
+
+    @POST("api/user/forgot-password")
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): Response<String>
 
     @GET("api/user/{email}")
     suspend fun getUser(@Path("email") email: String): Response<User>

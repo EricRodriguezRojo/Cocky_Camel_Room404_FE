@@ -23,6 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -33,7 +35,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -145,14 +148,16 @@ fun LoginScreen(
                         MinimalistField(
                             value = username,
                             onValueChange = { username = it },
-                            label = stringResource(R.string.login_email_label)
+                            label = stringResource(R.string.login_email_label),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         MinimalistField(
                             value = password,
                             onValueChange = { password = it },
                             label = stringResource(R.string.login_password_label),
-                            isPassword = true
+                            isPassword = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                         )
                         Spacer(modifier = Modifier.height(32.dp))
 
@@ -238,6 +243,17 @@ fun LoginScreen(
                                     letterSpacing = 1.sp
                                 )
                             }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            TextButton(onClick = onNavigateToForgotPassword) {
+                                Text(
+                                    text = stringResource(R.string.login_forgot_password_link),
+                                    color = Color.White.copy(alpha = 0.65f),
+                                    fontSize = 12.sp,
+                                    letterSpacing = 1.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -252,7 +268,8 @@ fun MinimalistField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     OutlinedTextField(
         value = value,
@@ -260,6 +277,7 @@ fun MinimalistField(
         label = { Text(label, fontSize = 11.sp, letterSpacing = 2.sp) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = keyboardOptions,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
