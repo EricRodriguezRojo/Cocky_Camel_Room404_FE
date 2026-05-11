@@ -13,24 +13,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
-data class FileItem(val name: String, val icon: ImageVector, val isFolder: Boolean, val size: String = "")
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
+fun FilesScreen(
+    onBack: () -> Unit, 
+    onPatchInstalled: () -> Unit,
+    viewModel: FilesViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var isInstalling by remember { mutableStateOf(false) }
-    var installProgress by remember { mutableStateOf(0f) }
 
     val items = listOf(
         FileItem("Android", Icons.Default.Folder, true),
@@ -60,7 +57,7 @@ fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
                             .clickable {
                                 when (item.name) {
                                     "gallery_fix_v2.apk" -> {
-                                        isInstalling = true
+                                        viewModel.startInstallation(context, onPatchInstalled)
                                     }
                                     ".sys_cache" -> {
                                         Toast.makeText(context, context.getString(R.string.files_access_denied), Toast.LENGTH_SHORT).show()
@@ -94,38 +91,14 @@ fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
             }
         }
 
-        if (isInstalling) {
-            LaunchedEffect(Unit) {
-                while (installProgress < 1f) {
-                    delay(50)
-                    installProgress += 0.02f
-                }
-
-                val segundos = TimeTracker.getSecondsElapsedAndReset()
-                try {
-                    val token = SessionManager.getToken(context)
-                    if (token != null) {
-                        RetrofitClient.instance.completePuzzle(
-                            token = "Bearer $token",
-                            puzzleName = "Gallery Patch",
-                            body = mapOf("timeSeconds" to segundos)
-                        )
-                    }
-                } catch (e: Exception) {
-                }
-
-                onPatchInstalled()
-                isInstalling = false
-                Toast.makeText(context, context.getString(R.string.files_gallery_success), Toast.LENGTH_LONG).show()
-            }
-
+        if (viewModel.isInstalling) {
             Box(
                 modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.85f)),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(
-                        progress = { installProgress },
+                        progress = { viewModel.installProgress },
                         color = Color(0xFF4CAF50),
                         strokeWidth = 4.dp
                     )
@@ -138,10 +111,16 @@ fun FilesScreen(onBack: () -> Unit, onPatchInstalled: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "${(installProgress * 100).toInt()}%",
+                        text = "${(viewModel.installProgress * 100).toInt()}%",
                         color = Color(0xFF4CAF50),
                         fontSize = 18.sp
                     )
+                }
+            }
+            
+            LaunchedEffect(viewModel.isInstalling) {
+                if (!viewModel.isInstalling && viewModel.installProgress >= 0.99f) {
+                    Toast.makeText(context, context.getString(R.string.files_gallery_success), Toast.LENGTH_LONG).show()
                 }
             }
         }

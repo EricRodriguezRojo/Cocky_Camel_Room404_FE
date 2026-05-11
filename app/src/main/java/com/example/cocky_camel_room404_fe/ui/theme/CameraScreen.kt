@@ -17,14 +17,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun CameraScreen(onBack: () -> Unit) {
-    var isError by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-
+fun CameraScreen(
+    onBack: () -> Unit,
+    viewModel: CameraViewModel = viewModel()
+) {
     val glitchRed = Color(0xFFFF5252)
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
@@ -81,11 +80,7 @@ fun CameraScreen(onBack: () -> Unit) {
                         .clip(CircleShape)
                         .background(Color.White)
                         .clickable {
-                            scope.launch {
-                                isError = true
-                                delay(1500)
-                                isError = false
-                            }
+                            viewModel.triggerError()
                         }
                 )
 
@@ -98,7 +93,7 @@ fun CameraScreen(onBack: () -> Unit) {
             }
         }
 
-        if (isError) {
+        if (viewModel.isError) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

@@ -21,28 +21,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-
-data class Alarm(val time: String, val label: String, val isEnabled: Boolean, val isSystemLocked: Boolean = false)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClockScreen(onBack: () -> Unit) {
+fun ClockScreen(
+    onBack: () -> Unit,
+    viewModel: ClockViewModel = viewModel()
+) {
     val context = LocalContext.current
 
     val accessDeniedMsg = stringResource(R.string.access_denied_task_blocked)
     val functionDisabledMsg = stringResource(R.string.function_disabled_temp)
 
-    val initialAlarms = listOf(
-        Alarm("07:00", stringResource(R.string.alarm_dam_class), true),
-        Alarm("08:30", stringResource(R.string.alarm_project_meeting), false),
-        Alarm("04:04", stringResource(R.string.alarm_system_disabled), true, true),
-        Alarm("14:15", stringResource(R.string.alarm_lunch), true),
-        Alarm("19:30", stringResource(R.string.alarm_gym), false)
-    )
+    val initialAlarms = remember {
+        listOf(
+            Alarm("07:00", context.getString(R.string.alarm_dam_class), true),
+            Alarm("08:30", context.getString(R.string.alarm_project_meeting), false),
+            Alarm("04:04", context.getString(R.string.alarm_system_disabled), true, true),
+            Alarm("14:15", context.getString(R.string.alarm_lunch), true),
+            Alarm("19:30", context.getString(R.string.alarm_gym), false)
+        )
+    }
 
-    var alarms by remember { mutableStateOf(initialAlarms) }
-    var selectedTab by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        viewModel.loadAlarms(initialAlarms)
+    }
 
     Scaffold(
         topBar = {
@@ -57,30 +62,30 @@ fun ClockScreen(onBack: () -> Unit) {
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF121212))
                 )
                 TabRow(
-                    selectedTabIndex = selectedTab,
+                    selectedTabIndex = viewModel.selectedTab,
                     containerColor = Color(0xFF121212),
                     contentColor = Color(0xFF03A9F4),
                     indicator = { tabPositions ->
                         TabRowDefaults.SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                            Modifier.tabIndicatorOffset(tabPositions[viewModel.selectedTab]),
                             color = Color(0xFF03A9F4)
                         )
                     }
                 ) {
                     Tab(
-                        selected = selectedTab == 0,
-                        onClick = { selectedTab = 0 },
-                        text = { Text(stringResource(R.string.tab_alarms), color = if (selectedTab == 0) Color(0xFF03A9F4) else Color.Gray) }
+                        selected = viewModel.selectedTab == 0,
+                        onClick = { viewModel.selectTab(0) },
+                        text = { Text(stringResource(R.string.tab_alarms), color = if (viewModel.selectedTab == 0) Color(0xFF03A9F4) else Color.Gray) }
                     )
                     Tab(
-                        selected = selectedTab == 1,
-                        onClick = { selectedTab = 1 },
-                        text = { Text(stringResource(R.string.tab_world), color = if (selectedTab == 1) Color(0xFF03A9F4) else Color.Gray) }
+                        selected = viewModel.selectedTab == 1,
+                        onClick = { viewModel.selectTab(1) },
+                        text = { Text(stringResource(R.string.tab_world), color = if (viewModel.selectedTab == 1) Color(0xFF03A9F4) else Color.Gray) }
                     )
                     Tab(
-                        selected = selectedTab == 2,
-                        onClick = { selectedTab = 2 },
-                        text = { Text(stringResource(R.string.tab_stopwatch), color = if (selectedTab == 2) Color(0xFF03A9F4) else Color.Gray) }
+                        selected = viewModel.selectedTab == 2,
+                        onClick = { viewModel.selectTab(2) },
+                        text = { Text(stringResource(R.string.tab_stopwatch), color = if (viewModel.selectedTab == 2) Color(0xFF03A9F4) else Color.Gray) }
                     )
                 }
             }
@@ -99,7 +104,7 @@ fun ClockScreen(onBack: () -> Unit) {
         },
         containerColor = Color(0xFF121212)
     ) { paddingValues ->
-        if (selectedTab == 0) {
+        if (viewModel.selectedTab == 0) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -109,7 +114,7 @@ fun ClockScreen(onBack: () -> Unit) {
             ) {
                 item { Spacer(modifier = Modifier.height(8.dp)) }
 
-                items(alarms) { alarm ->
+                items(viewModel.alarms) { alarm ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -136,12 +141,8 @@ fun ClockScreen(onBack: () -> Unit) {
                         Switch(
                             checked = alarm.isEnabled,
                             onCheckedChange = { isChecked ->
-                                if (alarm.isSystemLocked) {
+                                viewModel.toggleAlarm(alarm.time, isChecked) {
                                     Toast.makeText(context, accessDeniedMsg, Toast.LENGTH_LONG).show()
-                                } else {
-                                    alarms = alarms.map {
-                                        if (it.time == alarm.time) it.copy(isEnabled = isChecked) else it
-                                    }
                                 }
                             },
                             colors = SwitchDefaults.colors(

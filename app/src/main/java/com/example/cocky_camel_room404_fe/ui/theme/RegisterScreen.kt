@@ -18,23 +18,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    viewModel: RegisterViewModel = viewModel()
 ) {
-    var nickname by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
 
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    var isLoading by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -73,61 +68,37 @@ fun RegisterScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         MinimalistField(
-                            value = nickname,
-                            onValueChange = { nickname = it },
+                            value = viewModel.nickname,
+                            onValueChange = { viewModel.nickname = it },
                             label = stringResource(R.string.register_nickname_label)
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         MinimalistField(
-                            value = email,
-                            onValueChange = { email = it },
+                            value = viewModel.email,
+                            onValueChange = { viewModel.email = it },
                             label = stringResource(R.string.login_email_label)
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         MinimalistField(
-                            value = password,
-                            onValueChange = { password = it },
+                            value = viewModel.password,
+                            onValueChange = { viewModel.password = it },
                             label = stringResource(R.string.register_password_label),
                             isPassword = true
                         )
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        if (isLoading) {
+                        if (viewModel.isLoading) {
                             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         } else {
                             InteractionButton(
                                 text = stringResource(R.string.register_create_button),
                                 onClick = {
-                                    if (email.isBlank() || password.isBlank() || nickname.isBlank()) {
-                                        Toast.makeText(context, context.getString(R.string.register_required_fields), Toast.LENGTH_SHORT).show()
-                                        return@InteractionButton
-                                    }
-
-                                    coroutineScope.launch {
-                                        isLoading = true
-                                        try {
-                                            val newUser = User(
-                                                email = email,
-                                                nickname = nickname,
-                                                password = password,
-                                                role = "User",
-                                                isPremium = true
-                                            )
-                                            val response = RetrofitClient.instance.register(newUser)
-
-                                            if (response.isSuccessful) {
-                                                Toast.makeText(context, context.getString(R.string.register_success), Toast.LENGTH_SHORT).show()
-                                                onRegisterSuccess()
-                                            } else {
-                                                Toast.makeText(context, context.getString(R.string.register_email_exists), Toast.LENGTH_LONG).show()
-                                            }
-                                        } catch (e: Exception) {
-                                            Toast.makeText(context, "${context.getString(R.string.login_critical_error)}: ${e.message}", Toast.LENGTH_LONG).show()
-                                        } finally {
-                                            isLoading = false
-                                        }
-                                    }
+                                    viewModel.onRegisterClick(
+                                        context = context,
+                                        onRegisterSuccess = onRegisterSuccess,
+                                        onToast = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                    )
                                 }
                             )
                         }

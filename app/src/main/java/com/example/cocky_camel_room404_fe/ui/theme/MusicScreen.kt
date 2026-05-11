@@ -1,6 +1,5 @@
 package com.example.cocky_camel_room404_fe
 
-import android.media.MediaPlayer
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -27,49 +26,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.isActive
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MusicScreen(onBack: () -> Unit) {
-    val contexto = LocalContext.current
+fun MusicScreen(
+    onBack: () -> Unit,
+    viewModel: MusicViewModel = viewModel()
+) {
+    val context = LocalContext.current
 
-    val reproductor = remember {
-        val mp = MediaPlayer.create(contexto, R.raw.cancion_404)
-        mp.isLooping = true
-        mp
+    LaunchedEffect(Unit) {
+        viewModel.initMediaPlayer(context, R.raw.cancion_404)
     }
-
-    var reproduciendo by remember { mutableStateOf(false) }
-    var valorSlider by remember { mutableFloatStateOf(0f) }
-    var arrastrando by remember { mutableStateOf(false) }
-    val duracionTotal = reproductor.duration.toFloat()
 
     val rotacion = remember { Animatable(0f) }
 
-    LaunchedEffect(reproduciendo) {
-        while (reproduciendo && isActive) {
+    LaunchedEffect(viewModel.isPlaying) {
+        while (viewModel.isPlaying && isActive) {
             rotacion.animateTo(
                 targetValue = rotacion.value + 360f,
                 animationSpec = tween(durationMillis = 4000, easing = LinearEasing)
             )
-        }
-    }
-
-    LaunchedEffect(reproduciendo, arrastrando) {
-        while (reproduciendo && !arrastrando && isActive) {
-            valorSlider = reproductor.currentPosition.toFloat()
-            delay(500L)
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            if (reproductor.isPlaying) {
-                reproductor.pause()
-            }
-            reproductor.release()
         }
     }
 
@@ -150,16 +129,16 @@ fun MusicScreen(onBack: () -> Unit) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Slider(
-                    value = valorSlider,
+                    value = viewModel.sliderValue,
                     onValueChange = { nuevoValor ->
-                        arrastrando = true
-                        valorSlider = nuevoValor
+                        viewModel.isDragging = true
+                        viewModel.sliderValue = nuevoValor
                     },
                     onValueChangeFinished = {
-                        reproductor.seekTo(valorSlider.toInt())
-                        arrastrando = false
+                        viewModel.seekTo(viewModel.sliderValue)
+                        viewModel.isDragging = false
                     },
-                    valueRange = 0f..duracionTotal,
+                    valueRange = 0f..viewModel.totalDuration.coerceAtLeast(1f),
                     colors = SliderDefaults.colors(
                         thumbColor = Color.White,
                         activeTrackColor = Color.White,
@@ -171,8 +150,8 @@ fun MusicScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(formatoTiempo(valorSlider.toLong()), color = Color(0xFFAAAAAA), fontSize = 12.sp)
-                    Text(formatoTiempo(duracionTotal.toLong()), color = Color(0xFFAAAAAA), fontSize = 12.sp)
+                    Text(viewModel.formatTime(viewModel.sliderValue.toLong()), color = Color(0xFFAAAAAA), fontSize = 12.sp)
+                    Text(viewModel.formatTime(viewModel.totalDuration.toLong()), color = Color(0xFFAAAAAA), fontSize = 12.sp)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -182,14 +161,7 @@ fun MusicScreen(onBack: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = {
-                        var nuevaPos = reproductor.currentPosition - 10000
-                        if (nuevaPos < 0) {
-                            nuevaPos = 0
-                        }
-                        reproductor.seekTo(nuevaPos)
-                        valorSlider = nuevaPos.toFloat()
-                    }) {
+                    IconButton(onClick = { viewModel.skipBackward() }) {
                         Icon(Icons.Default.FastRewind, contentDescription = stringResource(R.string.music_rewind), tint = Color.White, modifier = Modifier.size(36.dp))
                     }
 
@@ -198,20 +170,10 @@ fun MusicScreen(onBack: () -> Unit) {
                             .size(72.dp)
                             .clip(CircleShape)
                             .background(Color.White)
-                            .clickable {
-                                if (reproduciendo) {
-                                    reproductor.pause()
-                                } else {
-                                    reproductor.start()
-                                }
-                                reproduciendo = !reproduciendo
-                            },
+                            .clickable { viewModel.togglePlayPause() },
                         contentAlignment = Alignment.Center
                     ) {
-                        var icono = Icons.Default.PlayArrow
-                        if (reproduciendo) {
-                            icono = Icons.Default.Pause
-                        }
+                        val icono = if (viewModel.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
 
                         Icon(
                             imageVector = icono,
@@ -221,25 +183,11 @@ fun MusicScreen(onBack: () -> Unit) {
                         )
                     }
 
-                    IconButton(onClick = {
-                        var nuevaPos = reproductor.currentPosition + 10000
-                        if (nuevaPos > reproductor.duration) {
-                            nuevaPos = reproductor.duration
-                        }
-                        reproductor.seekTo(nuevaPos)
-                        valorSlider = nuevaPos.toFloat()
-                    }) {
+                    IconButton(onClick = { viewModel.skipForward() }) {
                         Icon(Icons.Default.FastForward, contentDescription = stringResource(R.string.music_forward), tint = Color.White, modifier = Modifier.size(36.dp))
                     }
                 }
             }
         }
     }
-}
-
-fun formatoTiempo(milisegundos: Long): String {
-    val segundosTotales = milisegundos / 1000
-    val minutos = segundosTotales / 60
-    val segundos = segundosTotales % 60
-    return java.lang.String.format("%d:%02d", minutos, segundos)
 }

@@ -29,8 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun LockScreen(
@@ -38,16 +37,13 @@ fun LockScreen(
     correctPin: String,
     onSuccess: () -> Unit,
     onBack: () -> Unit,
-    context: Context
+    context: Context,
+    viewModel: LockViewModel = viewModel()
 ) {
-    var enteredPin by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-
     val vibrator = remember { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
 
     val pinDotColor by animateColorAsState(
-        targetValue = if (isError) Color(0xFFCF6679) else MaterialTheme.colorScheme.primary,
+        targetValue = if (viewModel.isError) Color(0xFFCF6679) else MaterialTheme.colorScheme.primary,
         label = ""
     )
 
@@ -109,11 +105,11 @@ fun LockScreen(
                             .clip(CircleShape)
                             .border(
                                 width = 2.dp,
-                                color = if (i < enteredPin.length) pinDotColor else Color.DarkGray,
+                                color = if (i < viewModel.enteredPin.length) pinDotColor else Color.DarkGray,
                                 shape = CircleShape
                             )
                             .background(
-                                if (i < enteredPin.length) pinDotColor else Color.Transparent
+                                if (i < viewModel.enteredPin.length) pinDotColor else Color.Transparent
                             )
                     )
                 }
@@ -148,35 +144,22 @@ fun LockScreen(
                                             .clip(CircleShape)
                                             .background(Color(0xFF1E1E1E))
                                             .clickable {
-                                                if (key == "del") {
-                                                    if (enteredPin.isNotEmpty()) enteredPin = enteredPin.dropLast(1)
-                                                } else {
-                                                    if (enteredPin.length < 4 && !isError) {
-                                                        enteredPin += key
-
-                                                        if (enteredPin.length == 4) {
-                                                            if (enteredPin == correctPin) {
-                                                                SessionManager.saveUnlockedApp(context, appName)
-                                                                onSuccess()
-                                                            } else {
-                                                                isError = true
-
-                                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                                    vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
-                                                                } else {
-                                                                    @Suppress("DEPRECATION")
-                                                                    vibrator.vibrate(400)
-                                                                }
-
-                                                                coroutineScope.launch {
-                                                                    delay(400)
-                                                                    enteredPin = ""
-                                                                    isError = false
-                                                                }
-                                                            }
+                                                viewModel.onKeyClick(
+                                                    key = key,
+                                                    correctPin = correctPin,
+                                                    onVibrate = {
+                                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                            vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+                                                        } else {
+                                                            @Suppress("DEPRECATION")
+                                                            vibrator.vibrate(400)
                                                         }
+                                                    },
+                                                    onSuccess = {
+                                                        SessionManager.saveUnlockedApp(context, appName)
+                                                        onSuccess()
                                                     }
-                                                }
+                                                )
                                             },
                                         contentAlignment = Alignment.Center
                                     ) {

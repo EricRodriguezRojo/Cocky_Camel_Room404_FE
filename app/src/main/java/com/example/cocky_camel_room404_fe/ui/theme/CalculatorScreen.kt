@@ -18,16 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalculatorScreen(onBack: () -> Unit) {
-    var displayText by remember { mutableStateOf("") }
-    var isGlitching by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-
+fun CalculatorScreen(
+    onBack: () -> Unit,
+    viewModel: CalculatorViewModel = viewModel()
+) {
     val err404 = stringResource(R.string.calc_err_404)
     val errMalware = stringResource(R.string.calc_malware_sys)
     val errCorrupted = stringResource(R.string.calc_corrupted)
@@ -67,16 +65,16 @@ fun CalculatorScreen(onBack: () -> Unit) {
             contentAlignment = Alignment.BottomEnd
         ) {
             Text(
-                text = displayText,
-                color = if (isGlitching) Color.Red else Color.White,
-                fontSize = if (displayText.length > 10) 36.sp else 56.sp,
+                text = viewModel.displayText,
+                color = if (viewModel.isGlitching) Color.Red else Color.White,
+                fontSize = if (viewModel.displayText.length > 10) 36.sp else 56.sp,
                 fontWeight = FontWeight.Light,
                 textAlign = TextAlign.End,
                 lineHeight = 60.sp
             )
         }
 
-        Divider(color = Color.DarkGray, thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
+        HorizontalDivider(color = Color.DarkGray, thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
         Spacer(modifier = Modifier.height(24.dp))
 
         Column(
@@ -112,31 +110,7 @@ fun CalculatorScreen(onBack: () -> Unit) {
                                 .clip(CircleShape)
                                 .background(bgColor)
                                 .clickable {
-                                    if (!isGlitching) {
-                                        when (btn) {
-                                            "AC" -> displayText = ""
-                                            "del" -> if (displayText.isNotEmpty()) displayText = displayText.dropLast(1)
-                                            "=" -> {
-                                                if (displayText.isNotEmpty()) {
-                                                    coroutineScope.launch {
-                                                        isGlitching = true
-                                                        val originalText = displayText
-                                                        displayText = err404
-                                                        delay(300)
-                                                        displayText = errMalware
-                                                        delay(300)
-                                                        displayText = errCorrupted
-                                                        delay(1000)
-                                                        displayText = originalText
-                                                        isGlitching = false
-                                                    }
-                                                }
-                                            }
-                                            else -> {
-                                                if (displayText.length < 15) displayText += btn
-                                            }
-                                        }
-                                    }
+                                    viewModel.onButtonClick(btn, err404, errMalware, errCorrupted)
                                 },
                             contentAlignment = Alignment.Center
                         ) {

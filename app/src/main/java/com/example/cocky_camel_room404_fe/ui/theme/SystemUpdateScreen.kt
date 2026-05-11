@@ -31,21 +31,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.sqrt
 
 @Composable
 fun SystemUpdateScreen(
     onSaveProgress: (String, Int) -> Unit,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    viewModel: SystemUpdateViewModel = viewModel()
 ) {
     val context = LocalContext.current
-
-    var gameStep by remember { mutableStateOf(0) }
-    var flashWhite by remember { mutableStateOf(false) }
-
-    var shakeStartTime by remember { mutableLongStateOf(0L) }
-    var chargeStartTime by remember { mutableLongStateOf(0L) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "")
     val alphaAnim by infiniteTransition.animateFloat(
@@ -60,17 +55,17 @@ fun SystemUpdateScreen(
 
     val bgColor by animateColorAsState(
         targetValue = when {
-            flashWhite -> Color.White
-            gameStep == 0 -> Color(0xFF330000)
-            gameStep == 1 -> Color(0xFF883300)
-            gameStep == 2 -> Color.Black
+            viewModel.flashWhite -> Color.White
+            viewModel.gameStep == 0 -> Color(0xFF330000)
+            viewModel.gameStep == 1 -> Color(0xFF883300)
+            viewModel.gameStep == 2 -> Color.Black
             else -> Color(0xFF003300)
         },
         label = ""
     )
 
     LaunchedEffect(Unit) {
-        shakeStartTime = System.currentTimeMillis()
+        viewModel.initShakeTime()
     }
 
     DisposableEffect(Unit) {
@@ -80,7 +75,7 @@ fun SystemUpdateScreen(
 
         val sensorListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
-                if (event != null && gameStep == 0) {
+                if (event != null && viewModel.gameStep == 0) {
                     val x = event.values[0]
                     val y = event.values[1]
                     val z = event.values[2]
@@ -88,10 +83,7 @@ fun SystemUpdateScreen(
                     val acceleration = sqrt((x * x + y * y + z * z).toDouble()) - SensorManager.GRAVITY_EARTH
 
                     if (acceleration > 12) {
-                        val timeTaken = (System.currentTimeMillis() - shakeStartTime) / 1000
-                        onSaveProgress("SHAKE_SYSTEM", timeTaken.toInt())
-
-                        chargeStartTime = System.currentTimeMillis()
+                        viewModel.onShakeDetected(onSaveProgress)
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE))
@@ -99,7 +91,6 @@ fun SystemUpdateScreen(
                             @Suppress("DEPRECATION")
                             vibrator.vibrate(1000)
                         }
-                        gameStep = 1
                     }
                 }
             }
@@ -108,10 +99,8 @@ fun SystemUpdateScreen(
 
         val powerReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == Intent.ACTION_POWER_CONNECTED && gameStep == 1) {
-                    val timeTaken = (System.currentTimeMillis() - chargeStartTime) / 1000
-                    onSaveProgress("CHARGER_SYSTEM", timeTaken.toInt())
-                    gameStep = 2
+                if (intent?.action == Intent.ACTION_POWER_CONNECTED && viewModel.gameStep == 1) {
+                    viewModel.onPowerConnected(onSaveProgress)
                 }
             }
         }
@@ -125,37 +114,21 @@ fun SystemUpdateScreen(
         }
     }
 
-    LaunchedEffect(gameStep) {
-        if (gameStep == 1) {
+    LaunchedEffect(viewModel.gameStep) {
+        if (viewModel.gameStep == 1) {
             val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
                 context.registerReceiver(null, ifilter)
             }
             val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
             val isCharging: Boolean = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
 
-            if (isCharging) {
-                delay(2000)
-                val timeTaken = (System.currentTimeMillis() - chargeStartTime) / 1000
-                onSaveProgress("CHARGER_SYSTEM", timeTaken.toInt())
-                gameStep = 2
-            }
+            viewModel.checkInitialCharging(isCharging, onSaveProgress)
         }
     }
 
-    LaunchedEffect(gameStep) {
-        if (gameStep == 2) {
-            delay(4000)
-            gameStep = 3
-        } else if (gameStep == 3) {
-            flashWhite = true
-            delay(100)
-            flashWhite = false
-            delay(100)
-            flashWhite = true
-            delay(500)
-            flashWhite = false
-            delay(3500)
-            onFinish()
+    LaunchedEffect(viewModel.gameStep) {
+        if (viewModel.gameStep == 3) {
+            viewModel.startSuccessSequence(onFinish)
         }
     }
 
@@ -166,7 +139,7 @@ fun SystemUpdateScreen(
             .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
-        when (gameStep) {
+        when (viewModel.gameStep) {
             0 -> {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
@@ -240,7 +213,7 @@ fun SystemUpdateScreen(
                 }
             }
             3 -> {
-                if (!flashWhite) {
+                if (!viewModel.flashWhite) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "SYSTEM UPDATED",
