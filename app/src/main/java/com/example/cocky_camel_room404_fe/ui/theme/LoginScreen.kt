@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions // Importante añadir esto
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import com.google.android.gms.common.api.ApiException
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
     var visible by remember { mutableStateOf(false) }
@@ -108,12 +110,15 @@ fun LoginScreen(
                         modifier = Modifier.padding(28.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        // Campo de Email
                         MinimalistField(
                             value = viewModel.email,
                             onValueChange = { viewModel.email = it },
                             label = stringResource(R.string.login_email_label)
                         )
                         Spacer(modifier = Modifier.height(20.dp))
+
+                        // Campo de Password
                         MinimalistField(
                             value = viewModel.password,
                             onValueChange = { viewModel.password = it },
@@ -135,6 +140,21 @@ fun LoginScreen(
                                     )
                                 }
                             )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            TextButton(
+                                onClick = onNavigateToForgotPassword,
+                                modifier = Modifier.align(Alignment.End)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.login_forgot_password_link),
+                                    color = Color.White.copy(alpha = 0.75f),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    letterSpacing = 1.sp
+                                )
+                            }
 
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(stringResource(R.string.login_or_divider), color = Color.White.copy(alpha = 0.3f), fontSize = 10.sp)
@@ -180,13 +200,17 @@ fun LoginScreen(
     }
 }
 
+/**
+ * FUNCIÓN CORREGIDA: Se han combinado los parámetros para evitar la ambigüedad.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MinimalistField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default // Se añade aquí para unificar
 ) {
     OutlinedTextField(
         value = value,
@@ -194,6 +218,7 @@ fun MinimalistField(
         label = { Text(label, fontSize = 11.sp, letterSpacing = 2.sp) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = keyboardOptions,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = Color.White.copy(alpha = 0.3f),

@@ -2,16 +2,13 @@ package com.example.cocky_camel_room404_fe
 
 import com.google.gson.GsonBuilder
 import retrofit2.Response
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
+import retrofit2.http.*
+
 
 data class LoginResponse(
     val token: String?,
@@ -31,6 +28,11 @@ data class ForgotPasswordRequest(
     val email: String
 )
 
+data class VerifyTokenRequest(
+    val email: String,
+    val token: String
+)
+
 data class FakeEmailDto(
     val id: Int? = null,
     val sender: String,
@@ -42,6 +44,7 @@ data class RankingDto(
     val totalPoints: Long,
     val totalTime: Long
 )
+
 
 interface Room404Api {
     @POST("api/user/login/{email}/{password}")
@@ -59,7 +62,13 @@ interface Room404Api {
     @POST("api/user/forgot-password")
     suspend fun forgotPassword(@Body request: ForgotPasswordRequest): Response<String>
 
-    @GET("api/user/{email}")
+    @POST("api/user/verify-reset-token")
+    suspend fun verifyResetToken(@Body request: VerifyTokenRequest): Response<Map<String, Any>>
+
+    @POST("api/user/reset-password")
+    suspend fun resetPassword(@Body body: Map<String, String>): Response<String>
+
+    @GET("api/user/email/{email}")
     suspend fun getUser(@Path("email") email: String): Response<User>
 
     @POST("api/game/trigger-malware")
@@ -93,17 +102,20 @@ interface Room404Api {
 object RetrofitClient {
     private const val BASE_URL = "http://10.0.2.2:8080/"
 
-    private val gson = GsonBuilder()
-        .setLenient()
-        .create()
+    private val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
 
-    val instance: Room404Api by lazy {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
+    private val httpClient = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .build()
 
-        retrofit.create(Room404Api::class.java)
-    }
+    private val gson = GsonBuilder().create()
+
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(ScalarsConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .client(httpClient)
+        .build()
+
+    val instance: Room404Api by lazy { retrofit.create(Room404Api::class.java) }
 }
