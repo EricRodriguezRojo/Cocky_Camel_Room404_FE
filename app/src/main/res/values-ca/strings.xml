@@ -23,6 +23,7 @@
     <string name="login_invalid_credentials">Credencials incorrectes</string>
     <string name="login_critical_error">Error crític</string>
     <string name="login_register_link">CREAR NOVES CREDENCIALS</string>
+    <string name="login_forgot_password_link">HAS OBLIDAT LA CLAU?</string>
     <string name="login_or_divider">O</string>
 
     <string name="register_nickname_label">ASSIGNAR NICKNAME</string>
@@ -32,6 +33,15 @@
     <string name="register_success">Node creat correctament</string>
     <string name="register_email_exists">Error: L\'email ja existeix</string>
     <string name="register_login_link">JA ESTÀS REGISTRAT? LOGIN</string>
+
+    <string name="forgot_password_title">RECUPERAR CONTRASENYA</string>
+    <string name="forgot_password_email_label">EMAIL DE RECUPERACIÓ</string>
+    <string name="forgot_password_send_button">ENVIAR CORREU</string>
+    <string name="forgot_password_back_link">TORNAR AL LOGIN</string>
+    <string name="forgot_password_required_email">L\'email és obligatori</string>
+    <string name="forgot_password_invalid_email">Introdueix un email vàlid</string>
+    <string name="forgot_password_success">Si el correu existeix, rebràs un enllaç de recuperació</string>
+    <string name="forgot_password_error">No s\'ha pogut enviar el correu de recuperació</string>
 
     <string name="menu_new_game">NOVA PARTIDA</string>
     <string name="menu_continue">CONTINUAR</string>

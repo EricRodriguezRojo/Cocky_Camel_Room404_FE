@@ -12,6 +12,7 @@ object SessionManager {
 
     private const val KEY_GALLERY_PATCHED = "gallery_patched"
     private const val KEY_INTRO_SEEN = "intro_seen"
+    private const val KEY_RESET_EMAIL = "reset_email"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -80,5 +81,17 @@ object SessionManager {
 
     fun logout(context: Context) {
         getPrefs(context).edit().clear().apply()
+    }
+
+    fun saveResetEmail(context: Context, email: String) {
+        getPrefs(context).edit().putString(KEY_RESET_EMAIL, email).apply()
+    }
+
+    fun getResetEmail(context: Context): String? {
+        return getPrefs(context).getString(KEY_RESET_EMAIL, null)
+    }
+
+    fun clearResetEmail(context: Context) {
+        getPrefs(context).edit().remove(KEY_RESET_EMAIL).apply()
     }
 }

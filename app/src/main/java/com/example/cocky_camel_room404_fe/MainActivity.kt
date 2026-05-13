@@ -2,6 +2,7 @@ package com.example.cocky_camel_room404_fe
 
 import android.os.Bundle
 import android.widget.Toast
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +36,19 @@ class MainActivity : AppCompatActivity() {
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
 
+        // Determine start destination, optionally from deep link token
+        var startDestination = if (SessionManager.getToken(this) != null) "main_menu" else "login"
+        var resetToken: String? = null
+        intent?.data?.let { uri ->
+            val queryToken = uri.getQueryParameter("token")
+            val pathToken = uri.lastPathSegment?.takeIf { it.isNotBlank() && it != uri.host }
+            resetToken = queryToken ?: pathToken
+            if (!resetToken.isNullOrBlank()) {
+                SessionManager.saveResetEmail(this, "") // Clear old email
+                startDestination = "enter_token"
+            }
+        }
+
         setContent {
             Room404Theme {
                 val context = LocalContext.current
@@ -42,19 +56,56 @@ class MainActivity : AppCompatActivity() {
                 val navController = rememberNavController()
                 var appToUnlock by remember { mutableStateOf("") }
                 var requiredPin by remember { mutableStateOf("") }
+                var recoveryEmail by remember { mutableStateOf("") }
 
                 var isGalleryPatched by remember { mutableStateOf(SessionManager.isGalleryPatched(context)) }
 
                 val scope = rememberCoroutineScope()
 
-                val startDestination = remember {
-                    if (SessionManager.getToken(context) != null) "main_menu" else "login"
-                }
-
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     NavHost(navController = navController, startDestination = startDestination) {
-                        composable("login") { LoginScreen(onLoginSuccess = { navController.navigate("main_menu") { popUpTo("login") { inclusive = true } } }, onNavigateToRegister = { navController.navigate("register") }) }
+                        composable("login") { LoginScreen(onLoginSuccess = { navController.navigate("main_menu") { popUpTo("login") { inclusive = true } } }, onNavigateToRegister = { navController.navigate("register") }, onNavigateToForgotPassword = { navController.navigate("forgot_password") }) }
                         composable("register") { RegisterScreen(onRegisterSuccess = { navController.navigate("login") }, onNavigateToLogin = { navController.navigate("login") }) }
+                        composable("forgot_password") {
+                            ForgotPasswordScreen(
+                                onNavigateToLogin = { navController.popBackStack() },
+                                onNavigateToToken = { email ->
+                                    recoveryEmail = email
+                                    navController.navigate("enter_token")
+                                }
+                            )
+                        }
+
+                        composable("enter_token") { backStackEntry ->
+                            var prefilledToken by remember { mutableStateOf("") }
+                            LaunchedEffect(Unit) {
+                                if (prefilledToken.isEmpty() && resetToken != null) {
+                                    prefilledToken = resetToken!!
+                                    resetToken = null
+                                }
+                            }
+                            TokenEntryScreen(
+                                prefilledToken = prefilledToken,
+                                recoveryEmail = recoveryEmail,
+                                onVerified = { token -> navController.navigate("reset_password/${Uri.encode(token)}") },
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable("reset_password/{token}") { backStackEntry ->
+                            val token = backStackEntry.arguments?.getString("token")
+                            ResetPasswordScreen(
+                                token = token,
+                                recoveryEmail = recoveryEmail,
+                                onResetSuccess = {
+                                    recoveryEmail = ""
+                                    navController.navigate("login") {
+                                        popUpTo("reset_password/{token}") { inclusive = true }
+                                    }
+                                },
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
 
                         composable("main_menu") {
                             MainMenuScreen(

@@ -52,6 +52,7 @@
     <string name="login_invalid_credentials">Incorrect credentials</string>
     <string name="login_critical_error">Critical error</string>
     <string name="login_register_link">CREATE NEW CREDENTIALS</string>
+    <string name="login_forgot_password_link">FORGOT PASSWORD?</string>
     <string name="login_or_divider">OR</string>
 
     <string name="register_nickname_label">ASSIGN NICKNAME</string>
@@ -61,6 +62,15 @@
     <string name="register_success">Node created correctly</string>
     <string name="register_email_exists">Error: Email already exists</string>
     <string name="register_login_link">ALREADY REGISTERED? LOGIN</string>
+
+    <string name="forgot_password_title">RESET PASSWORD</string>
+    <string name="forgot_password_email_label">RECOVERY EMAIL</string>
+    <string name="forgot_password_send_button">SEND EMAIL</string>
+    <string name="forgot_password_back_link">BACK TO LOGIN</string>
+    <string name="forgot_password_required_email">Email is required</string>
+    <string name="forgot_password_invalid_email">Enter a valid email</string>
+    <string name="forgot_password_success">If the email exists, you will receive a recovery link</string>
+    <string name="forgot_password_error">Could not send the recovery email</string>
 
     <string name="menu_new_game">NEW GAME</string>
     <string name="menu_continue">CONTINUE</string>
