@@ -12,7 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions // Importante añadir esto
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -110,7 +110,6 @@ fun LoginScreen(
                         modifier = Modifier.padding(28.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Campo de Email
                         MinimalistField(
                             value = viewModel.email,
                             onValueChange = { viewModel.email = it },
@@ -118,14 +117,28 @@ fun LoginScreen(
                         )
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // Campo de Password
                         MinimalistField(
                             value = viewModel.password,
                             onValueChange = { viewModel.password = it },
                             label = stringResource(R.string.login_password_label),
                             isPassword = true
                         )
-                        Spacer(modifier = Modifier.height(32.dp))
+
+                        TextButton(
+                            onClick = onNavigateToForgotPassword,
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(top = 4.dp, bottom = 16.dp),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.login_forgot_password_link),
+                                color = Color.White.copy(alpha = 0.75f),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = 1.sp
+                            )
+                        }
 
                         if (viewModel.isLoading) {
                             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
@@ -141,57 +154,30 @@ fun LoginScreen(
                                 }
                             )
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = stringResource(R.string.login_or_divider),
+                                color = Color.White.copy(alpha = 0.3f),
+                                fontSize = 10.sp
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
 
-                            TextButton(
-                                onClick = onNavigateToForgotPassword,
-                                modifier = Modifier.align(Alignment.End)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.login_forgot_password_link),
-                                    color = Color.White.copy(alpha = 0.75f),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    letterSpacing = 1.sp
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(stringResource(R.string.login_or_divider), color = Color.White.copy(alpha = 0.3f), fontSize = 10.sp)
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            OutlinedButton(
+                            InteractionButton(
+                                text = stringResource(R.string.login_google_button),
+                                isOutlined = true,
+                                iconId = R.drawable.ic_google,
                                 onClick = {
                                     googleLauncher.launch(googleSignInClient.signInIntent)
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp),
-                                shape = MaterialTheme.shapes.extraSmall,
-                                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.3f))
-                            ) {
-                                Text(stringResource(R.string.login_google_button), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                            }
+                                }
+                            )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            OutlinedButton(
-                                onClick = onNavigateToRegister,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp),
-                                shape = MaterialTheme.shapes.extraSmall,
-                                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.3f)
-                                )
-                            ) {
-                                Text(
-                                    stringResource(R.string.login_register_link),
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp
-                                )
-                            }
+                            InteractionButton(
+                                text = stringResource(R.string.login_register_link),
+                                isOutlined = true,
+                                onClick = onNavigateToRegister
+                            )
                         }
                     }
                 }
@@ -200,9 +186,6 @@ fun LoginScreen(
     }
 }
 
-/**
- * FUNCIÓN CORREGIDA: Se han combinado los parámetros para evitar la ambigüedad.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MinimalistField(
@@ -210,7 +193,7 @@ fun MinimalistField(
     onValueChange: (String) -> Unit,
     label: String,
     isPassword: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default // Se añade aquí para unificar
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     OutlinedTextField(
         value = value,
@@ -234,25 +217,76 @@ fun MinimalistField(
     )
 }
 
+/**
+ * BOTÓN UNIFICADO:
+ * Ahora soporta estilo sólido y delineado (isOutlined), además de permitir un icono opcional.
+ * Esto mantiene la misma animación, altura y proporciones para todos los botones.
+ */
 @Composable
-fun InteractionButton(text: String, onClick: () -> Unit) {
+fun InteractionButton(
+    text: String,
+    onClick: () -> Unit,
+    isOutlined: Boolean = false,
+    iconId: Int? = null
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "")
+    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "button_scale")
 
-    Button(
-        onClick = onClick,
-        interactionSource = interactionSource,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp)
-            .scale(scale),
-        shape = MaterialTheme.shapes.extraSmall,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.Black
-        )
+    val buttonModifier = Modifier
+        .fillMaxWidth()
+        .height(50.dp)
+        .scale(scale)
+
+    if (isOutlined) {
+        OutlinedButton(
+            onClick = onClick,
+            interactionSource = interactionSource,
+            modifier = buttonModifier,
+            shape = MaterialTheme.shapes.extraSmall,
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.White
+            )
+        ) {
+            ButtonContent(text = text, iconId = iconId)
+        }
+    } else {
+        Button(
+            onClick = onClick,
+            interactionSource = interactionSource,
+            modifier = buttonModifier,
+            shape = MaterialTheme.shapes.extraSmall,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.Black
+            )
+        ) {
+            ButtonContent(text = text, iconId = iconId)
+        }
+    }
+}
+
+@Composable
+private fun ButtonContent(text: String, iconId: Int?) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        Text(text = text, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+        if (iconId != null) {
+            Icon(
+                painter = painterResource(id = iconId),
+                contentDescription = "Google Icon",
+                modifier = Modifier.size(20.dp),
+                tint = Color.Unspecified
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+        }
+        Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp,
+            fontSize = 12.sp
+        )
     }
 }
