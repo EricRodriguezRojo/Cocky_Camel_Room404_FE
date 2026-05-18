@@ -19,6 +19,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cocky_camel_room404_fe.ui.theme.AdminMailScreen
 import com.example.cocky_camel_room404_fe.ui.theme.CalendarScreen
 import com.example.cocky_camel_room404_fe.ui.theme.Room404Theme
 import kotlinx.coroutines.launch
@@ -36,7 +37,6 @@ class MainActivity : AppCompatActivity() {
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
 
-        // Determine start destination, optionally from deep link token
         var startDestination = if (SessionManager.getToken(this) != null) "main_menu" else "login"
         var resetToken: String? = null
         intent?.data?.let { uri ->
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             val pathToken = uri.lastPathSegment?.takeIf { it.isNotBlank() && it != uri.host }
             resetToken = queryToken ?: pathToken
             if (!resetToken.isNullOrBlank()) {
-                SessionManager.saveResetEmail(this, "") // Clear old email
+                SessionManager.saveResetEmail(this, "")
                 startDestination = "enter_token"
             }
         }
@@ -170,9 +170,10 @@ class MainActivity : AppCompatActivity() {
                                         R.string.app_camera -> navController.navigate("camera") { launchSingleTop = true }
                                         R.string.app_internet -> navController.navigate("internet") { launchSingleTop = true }
                                         R.string.app_playstore -> navController.navigate("play_store") { launchSingleTop = true }
+
                                         R.string.app_mail -> {
                                             val role = SessionManager.getRole(context)
-                                            if (role == "Admin") {
+                                            if (role != null && role.equals("Admin", ignoreCase = true)) {
                                                 navController.navigate("admin_mail") { launchSingleTop = true }
                                             } else if (SessionManager.isAppUnlocked(context, "Correo")) {
                                                 navController.navigate("mail") { launchSingleTop = true }
@@ -182,6 +183,7 @@ class MainActivity : AppCompatActivity() {
                                                 navController.navigate("lock_screen") { launchSingleTop = true }
                                             }
                                         }
+
                                         R.string.app_system_update -> {
                                             if (SessionManager.isAppUnlocked(context, "System Update")) {
                                                 navController.navigate("system_update") { launchSingleTop = true }
@@ -219,8 +221,12 @@ class MainActivity : AppCompatActivity() {
 
                                     when (appToUnlock) {
                                         "Correo" -> {
-                                            if (SessionManager.getRole(context) == "Admin") navController.navigate("admin_mail") { popUpTo("fake_os") }
-                                            else navController.navigate("mail") { popUpTo("fake_os") }
+                                            val role = SessionManager.getRole(context)
+                                            if (role != null && role.equals("Admin", ignoreCase = true)) {
+                                                navController.navigate("admin_mail") { popUpTo("fake_os") }
+                                            } else {
+                                                navController.navigate("mail") { popUpTo("fake_os") }
+                                            }
                                         }
                                         "Archivos" -> navController.navigate("files") { popUpTo("fake_os") }
                                         else -> navController.navigate("system_update") { popUpTo("fake_os") }

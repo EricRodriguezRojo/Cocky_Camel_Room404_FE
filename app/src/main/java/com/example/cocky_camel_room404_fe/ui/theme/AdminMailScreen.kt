@@ -1,4 +1,4 @@
-package com.example.cocky_camel_room404_fe
+package com.example.cocky_camel_room404_fe.ui.theme
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,127 +17,86 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cocky_camel_room404_fe.AdminMailViewModel
+import com.example.cocky_camel_room404_fe.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminMailScreen(onBack: () -> Unit) {
+fun AdminMailScreen(
+    onBack: () -> Unit,
+    viewModel: AdminMailViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    var emails by remember { mutableStateOf<List<FakeEmailDto>>(emptyList()) }
-
-    var showDialog by remember { mutableStateOf(false) }
-    var editingEmailId by remember { mutableStateOf<Int?>(null) }
-    var inputSender by remember { mutableStateOf("") }
-    var inputBody by remember { mutableStateOf("") }
-
-    val msgDeleted = stringResource(R.string.email_deleted)
-    val msgCreated = stringResource(R.string.email_created)
-    val msgUpdated = stringResource(R.string.email_updated)
-
-    fun loadEmails() {
-        coroutineScope.launch {
-            try {
-                val response = RetrofitClient.instance.getEmails()
-                if (response.isSuccessful) {
-                    emails = response.body() ?: emptyList()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun deleteEmail(id: Int) {
-        coroutineScope.launch {
-            try {
-                val response = RetrofitClient.instance.deleteEmail(id)
-                if (response.isSuccessful) {
-                    loadEmails()
-                    Toast.makeText(context, msgDeleted, Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun createEmail(sender: String, body: String) {
-        coroutineScope.launch {
-            try {
-                val newEmail = FakeEmailDto(sender = sender, bodyText = body)
-                val response = RetrofitClient.instance.createEmail(newEmail)
-                if (response.isSuccessful) {
-                    loadEmails()
-                    showDialog = false
-                    Toast.makeText(context, msgCreated, Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun updateEmail(id: Int, sender: String, body: String) {
-        coroutineScope.launch {
-            try {
-                val updatedEmail = FakeEmailDto(id = id, sender = sender, bodyText = body)
-                val response = RetrofitClient.instance.updateEmail(id, updatedEmail)
-                if (response.isSuccessful) {
-                    loadEmails()
-                    showDialog = false
-                    Toast.makeText(context, msgUpdated, Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 
     LaunchedEffect(Unit) {
-        loadEmails()
+        viewModel.loadEmails()
     }
 
-    if (showDialog) {
+    if (viewModel.showForbiddenError) {
         AlertDialog(
-            onDismissRequest = { showDialog = false },
+            onDismissRequest = { viewModel.dismissForbiddenError() },
+            icon = { Icon(Icons.Default.Security, contentDescription = null, tint = Color.Red) },
+            title = { Text(stringResource(R.string.admin_security_error_title)) },
+            text = { Text(stringResource(R.string.admin_security_error_text)) },
+            confirmButton = {
+                Button(onClick = { viewModel.dismissForbiddenError() }) {
+                    Text(stringResource(R.string.admin_understood))
+                }
+            }
+        )
+    }
+
+    if (viewModel.showDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissDialog() },
             title = {
-                Text(if (editingEmailId == null) stringResource(R.string.new_email) else stringResource(R.string.edit_email))
+                Text(
+                    if (viewModel.editingEmailId == null)
+                        stringResource(R.string.admin_new_message)
+                    else
+                        stringResource(R.string.admin_edit_message)
+                )
             },
             text = {
                 Column {
                     OutlinedTextField(
-                        value = inputSender,
-                        onValueChange = { inputSender = it },
-                        label = { Text(stringResource(R.string.sender)) },
-                        modifier = Modifier.fillMaxWidth()
+                        value = viewModel.inputSender,
+                        onValueChange = {
+                            viewModel.inputSender = it
+                            if (viewModel.senderError) viewModel.senderError = false
+                        },
+                        label = { Text(stringResource(R.string.admin_sender)) },
+                        isError = viewModel.senderError,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
-                        value = inputBody,
-                        onValueChange = { inputBody = it },
-                        label = { Text(stringResource(R.string.message_content)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 3
+                        value = viewModel.inputBody,
+                        onValueChange = {
+                            viewModel.inputBody = it
+                            if (viewModel.bodyError) viewModel.bodyError = false
+                        },
+                        label = { Text(stringResource(R.string.admin_message_body)) },
+                        isError = viewModel.bodyError,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp),
+                        maxLines = 10
                     )
                 }
             },
             confirmButton = {
                 Button(onClick = {
-                    if (inputSender.isNotBlank() && inputBody.isNotBlank()) {
-                        if (editingEmailId == null) {
-                            createEmail(inputSender, inputBody)
-                        } else {
-                            updateEmail(editingEmailId!!, inputSender, inputBody)
-                        }
+                    viewModel.saveEmail { msg ->
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                     }
                 }) {
-                    Text(stringResource(R.string.save))
+                    Text(stringResource(R.string.admin_save))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.cancel))
+                TextButton(onClick = { viewModel.dismissDialog() }) {
+                    Text(stringResource(R.string.admin_cancel))
                 }
             }
         )
@@ -149,10 +105,14 @@ fun AdminMailScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.admin_panel_emails), color = Color.White) },
+                title = { Text(stringResource(R.string.admin_panel_title), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.admin_back_desc),
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
@@ -160,64 +120,63 @@ fun AdminMailScreen(onBack: () -> Unit) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    editingEmailId = null
-                    inputSender = ""
-                    inputBody = ""
-                    showDialog = true
-                },
+                onClick = { viewModel.openCreateDialog() },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_email), tint = Color.Black)
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.admin_add_desc),
+                    tint = Color.Black
+                )
             }
         }
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .background(Color(0xFF121212))
+            modifier = Modifier.padding(paddingValues).fillMaxSize().background(Color(0xFF121212))
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                items(emails) { email ->
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                items(viewModel.emails) { email ->
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A))
                     ) {
                         Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "${stringResource(R.string.from)}: ${email.sender}",
+                                    text = "${stringResource(R.string.admin_from)}: ${email.sender}",
                                     color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
+                                    fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(text = email.bodyText, color = Color.LightGray, fontSize = 14.sp)
+                                Text(
+                                    text = email.bodyText,
+                                    color = Color.LightGray,
+                                    fontSize = 14.sp,
+                                    maxLines = 2
+                                )
                             }
                             Row {
-                                IconButton(onClick = {
-                                    editingEmailId = email.id
-                                    inputSender = email.sender
-                                    inputBody = email.bodyText
-                                    showDialog = true
-                                }) {
-                                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit), tint = Color.White)
+                                IconButton(onClick = { viewModel.openEditDialog(email) }) {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        contentDescription = stringResource(R.string.admin_edit_desc),
+                                        tint = Color.White
+                                    )
                                 }
-                                IconButton(onClick = { email.id?.let { deleteEmail(it) } }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Red)
+                                IconButton(onClick = { email.id?.let {
+                                    viewModel.deleteEmail(it) { msg ->
+                                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                    }
+                                } }) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = stringResource(R.string.admin_delete_desc),
+                                        tint = Color.Red
+                                    )
                                 }
                             }
                         }

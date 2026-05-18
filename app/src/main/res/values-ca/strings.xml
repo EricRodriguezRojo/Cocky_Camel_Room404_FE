@@ -25,7 +25,25 @@
     <string name="login_register_link">CREAR NOVES CREDENCIALS</string>
     <string name="login_forgot_password_link">HAS OBLIDAT LA CLAU?</string>
     <string name="login_or_divider">O</string>
-
+    <string name="admin_security_error_title">Error de Seguretat</string>
+    <string name="admin_security_error_text">Error: No tens privilegis d\'administrador per a realitzar aquesta acció.</string>
+    <string name="admin_understood">Entès</string>
+    <string name="admin_new_message">Nou Missatge de l\'Arquitecte</string>
+    <string name="admin_edit_message">Editar Missatge</string>
+    <string name="admin_sender">Remitent</string>
+    <string name="admin_message_body">Cos del missatge</string>
+    <string name="admin_save">Desar</string>
+    <string name="admin_cancel">Cancel·lar</string>
+    <string name="admin_panel_title">Panell Admin: Correus</string>
+    <string name="admin_from">De</string>
+    <string name="admin_back_desc">Tornar enrere</string>
+    <string name="admin_add_desc">Afegir nou correu</string>
+    <string name="admin_edit_desc">Editar correu</string>
+    <string name="admin_delete_desc">Eliminar correu</string>
+    <string name="register_invalid_email">Si us plau, introdueix un correu electrònic vàlid</string>
+    <string name="register_weak_password">La contrasenya ha de tenir almenys 6 caràcters</string>
+    <string name="register_email_error_hint">Format de correu electrònic invàlid (exemple@mail.com)</string>
+    <string name="register_password_error_hint">Contrasenya feble (mínim 6 caràcters)</string>
     <string name="register_nickname_label">ASSIGNAR NICKNAME</string>
     <string name="register_password_label">CLAU DE SEGURETAT</string>
     <string name="register_create_button">CREAR CREDENCIALS</string>

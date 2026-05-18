@@ -1,5 +1,6 @@
 package com.example.cocky_camel_room404_fe
 
+import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,12 +17,20 @@ class AdminMailViewModel : ViewModel() {
     var inputSender by mutableStateOf("")
     var inputBody by mutableStateOf("")
 
+    var senderError by mutableStateOf(false)
+    var bodyError by mutableStateOf(false)
+
+    var showForbiddenError by mutableStateOf(false)
+        private set
+
     fun loadEmails() {
         viewModelScope.launch {
             try {
                 val response = RetrofitClient.instance.getEmails()
                 if (response.isSuccessful) {
                     emails = response.body() ?: emptyList()
+                } else if (response.code() == 403) {
+                    showForbiddenError = true
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -36,6 +45,8 @@ class AdminMailViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     loadEmails()
                     onResult("Email eliminado")
+                } else if (response.code() == 403) {
+                    showForbiddenError = true
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -44,15 +55,33 @@ class AdminMailViewModel : ViewModel() {
     }
 
     fun saveEmail(onResult: (String) -> Unit) {
-        if (inputSender.isBlank() || inputBody.isBlank()) return
+        senderError = false
+        bodyError = false
+
+        val trimmedSender = inputSender.trim()
+        val trimmedBody = inputBody.trim()
+
+        if (trimmedSender.isEmpty()) senderError = true
+        if (trimmedBody.isEmpty()) bodyError = true
+
+        if (senderError || bodyError) {
+            onResult("Por favor, rellena todos los campos")
+            return
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(trimmedSender).matches()) {
+            senderError = true
+            onResult("El formato del remitente no es un correo válido")
+            return
+        }
 
         viewModelScope.launch {
             try {
                 val response = if (editingEmailId == null) {
-                    val newEmail = FakeEmailDto(sender = inputSender, bodyText = inputBody)
+                    val newEmail = FakeEmailDto(sender = trimmedSender, bodyText = trimmedBody)
                     RetrofitClient.instance.createEmail(newEmail)
                 } else {
-                    val updatedEmail = FakeEmailDto(id = editingEmailId, sender = inputSender, bodyText = inputBody)
+                    val updatedEmail = FakeEmailDto(id = editingEmailId, sender = trimmedSender, bodyText = trimmedBody)
                     RetrofitClient.instance.updateEmail(editingEmailId!!, updatedEmail)
                 }
 
@@ -60,6 +89,8 @@ class AdminMailViewModel : ViewModel() {
                     loadEmails()
                     showDialog = false
                     onResult(if (editingEmailId == null) "Email creado" else "Email actualizado")
+                } else if (response.code() == 403) {
+                    showForbiddenError = true
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -71,6 +102,7 @@ class AdminMailViewModel : ViewModel() {
         editingEmailId = null
         inputSender = ""
         inputBody = ""
+        clearErrors()
         showDialog = true
     }
 
@@ -78,10 +110,21 @@ class AdminMailViewModel : ViewModel() {
         editingEmailId = email.id
         inputSender = email.sender
         inputBody = email.bodyText
+        clearErrors()
         showDialog = true
     }
 
     fun dismissDialog() {
         showDialog = false
+        clearErrors()
+    }
+
+    fun dismissForbiddenError() {
+        showForbiddenError = false
+    }
+
+    private fun clearErrors() {
+        senderError = false
+        bodyError = false
     }
 }

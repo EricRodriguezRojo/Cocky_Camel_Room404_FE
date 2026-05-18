@@ -73,18 +73,41 @@ fun RegisterScreen(
                             label = stringResource(R.string.register_nickname_label)
                         )
                         Spacer(modifier = Modifier.height(20.dp))
+
                         MinimalistField(
                             value = viewModel.email,
                             onValueChange = { viewModel.email = it },
                             label = stringResource(R.string.login_email_label)
                         )
+                        if (!viewModel.isEmailValid) {
+                            Text(
+                                text = "Formato de correo electrónico inválido (ejemplo@mail.com)",
+                                color = Color.Red,
+                                fontSize = 11.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp, start = 4.dp)
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(20.dp))
+
                         MinimalistField(
                             value = viewModel.password,
                             onValueChange = { viewModel.password = it },
                             label = stringResource(R.string.register_password_label),
                             isPassword = true
                         )
+                        if (!viewModel.isPasswordStrong) {
+                            Text(
+                                text = "Contraseña débil (mínimo 6 caracteres)",
+                                color = Color.Red,
+                                fontSize = 11.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp, start = 4.dp)
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(32.dp))
 
@@ -93,6 +116,7 @@ fun RegisterScreen(
                         } else {
                             InteractionButton(
                                 text = stringResource(R.string.register_create_button),
+                                enabled = viewModel.canSubmit,
                                 onClick = {
                                     viewModel.onRegisterClick(
                                         context = context,
