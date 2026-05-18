@@ -217,21 +217,22 @@ fun MinimalistField(
     )
 }
 
-/**
- * BOTÓN UNIFICADO:
- * Ahora soporta estilo sólido y delineado (isOutlined), además de permitir un icono opcional.
- * Esto mantiene la misma animación, altura y proporciones para todos los botones.
- */
+
 @Composable
 fun InteractionButton(
     text: String,
     onClick: () -> Unit,
     isOutlined: Boolean = false,
-    iconId: Int? = null
+    iconId: Int? = null,
+    enabled: Boolean = true
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "button_scale")
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed && enabled) 0.96f else 1f,
+        label = "button_scale"
+    )
 
     val buttonModifier = Modifier
         .fillMaxWidth()
@@ -241,12 +242,16 @@ fun InteractionButton(
     if (isOutlined) {
         OutlinedButton(
             onClick = onClick,
+            enabled = enabled,
             interactionSource = interactionSource,
             modifier = buttonModifier,
             shape = MaterialTheme.shapes.extraSmall,
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+            border = BorderStroke(
+                1.dp,
+                if (enabled) Color.White.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.1f)
+            ),
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = Color.White
+                contentColor = if (enabled) Color.White else Color.Gray
             )
         ) {
             ButtonContent(text = text, iconId = iconId)
@@ -254,12 +259,13 @@ fun InteractionButton(
     } else {
         Button(
             onClick = onClick,
+            enabled = enabled,
             interactionSource = interactionSource,
             modifier = buttonModifier,
             shape = MaterialTheme.shapes.extraSmall,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.Black
+                containerColor = if (enabled) MaterialTheme.colorScheme.primary else Color.DarkGray,
+                contentColor = if (enabled) Color.Black else Color.Gray
             )
         ) {
             ButtonContent(text = text, iconId = iconId)
