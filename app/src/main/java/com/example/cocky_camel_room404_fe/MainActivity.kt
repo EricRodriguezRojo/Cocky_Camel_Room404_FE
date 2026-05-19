@@ -134,6 +134,11 @@ class MainActivity : AppCompatActivity() {
                                 navController.navigate("fake_os") {
                                     popUpTo("system_intro") { inclusive = true }
                                 }
+                            }, onSkip = {
+                                TimeTracker.start()
+                                navController.navigate("fake_os") {
+                                    popUpTo("system_intro") { inclusive = true }
+                                }
                             })
                         }
 

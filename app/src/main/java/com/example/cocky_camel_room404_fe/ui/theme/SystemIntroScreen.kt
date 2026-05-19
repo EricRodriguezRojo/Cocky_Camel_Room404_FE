@@ -1,21 +1,25 @@
 package com.example.cocky_camel_room404_fe.ui.theme
 
 import android.media.MediaPlayer
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cocky_camel_room404_fe.R
 import com.example.cocky_camel_room404_fe.SessionManager
@@ -25,6 +29,7 @@ import com.example.cocky_camel_room404_fe.TerminalLine
 @Composable
 fun SystemIntroScreen(
     onFinished: () -> Unit,
+    onSkip: () -> Unit = onFinished,
     viewModel: SystemIntroViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -78,6 +83,28 @@ fun SystemIntroScreen(
             .padding(16.dp)
             .clickable(enabled = viewModel.sequenceFinished) { onFinished() }
     ) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .zIndex(1f)
+                .border(1.dp, Color.Green.copy(alpha = 0.8f), RoundedCornerShape(6.dp))
+                .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(6.dp))
+                .clickable(enabled = !viewModel.sequenceFinished) {
+                    viewModel.skipSequence()
+                    SessionManager.setIntroSeen(context, true)
+                    onSkip()
+                }
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            Text(
+                text = "SKIP",
+                color = Color.Green,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp,
+                letterSpacing = 1.sp
+            )
+        }
+
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize()

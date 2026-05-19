@@ -8,11 +8,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 data class TerminalLine(val text: String, val color: Color)
 
 class SystemIntroViewModel : ViewModel() {
+    private var sequenceJob: Job? = null
+
     var visibleLines by mutableStateOf(emptyList<TerminalLine>())
         private set
     var currentLineText by mutableStateOf("")
@@ -34,9 +37,9 @@ class SystemIntroViewModel : ViewModel() {
     }
 
     fun startSequence(lines: List<TerminalLine>, onFinished: () -> Unit) {
-        if (currentIndex > 0 || visibleLines.isNotEmpty()) return
+        if (sequenceJob?.isActive == true || currentIndex > 0 || visibleLines.isNotEmpty()) return
 
-        viewModelScope.launch {
+        sequenceJob = viewModelScope.launch {
             for (i in lines.indices) {
                 val fullText = lines[i].text
                 currentIndex = i
@@ -56,5 +59,11 @@ class SystemIntroViewModel : ViewModel() {
             delay(1500)
             onFinished()
         }
+    }
+
+    fun skipSequence() {
+        sequenceJob?.cancel()
+        sequenceJob = null
+        sequenceFinished = true
     }
 }
